@@ -1,6 +1,6 @@
 # Struct2PPI - Protein-Protein Interaction Network Visualizer from protein complexes
 
-Generate interactive protein-protein interaction graphs from PDB/CIF files of Cryo-EM complexes.
+Generate interactive protein-protein interaction graphs from PDB/CIF files of Cryo-EM complexes (and not just Cryo-EM).
 
 ![PPI Graph Example - 8XKS](Scheme.jpg)
 
