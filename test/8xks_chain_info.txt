@@ -1,22 +1,22 @@
 Chain ID	Description
 ------------------------------------------------------------
-A	Ctap1
-B	Fhl2
-C	4Fe-4S ferredoxin-type domain-containing protein
-D	AAA+ ATPase domain-containing protein
-E	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region
-F	AAA+ ATPase domain-containing protein
-G	AAA+ ATPase domain-containing protein
-H	Flagellar associated protein
-I	Tic22
-J	FaxL
-K	Fatty acid desaturase domain-containing protein
-L	Moc25
-M	Moc29
-N	Moc34
-O	Moc45
-P	PcyA1
-Q	ADP-ribosylglycohydrolase
-R	Acyl carrier protein
-S	Moc13
-T	Moc31
+A	CTAP1
+B	FHL2
+C	4FE-4S FERREDOXIN-TYPE DOMAIN-CONTAINING PROTEIN
+D	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN
+E	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC
+F	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN
+G	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN
+H	FLAGELLAR ASSOCIATED PROTEIN
+I	TIC22
+J	FAXL
+K	FATTY ACID DESATURASE DOMAIN-CONTAINING PROTEIN
+L	MOC25
+M	MOC29
+N	MOC34
+O	MOC45
+P	PCYA1
+Q	ADP-RIBOSYLGLYCOHYDROLASE
+R	ACYL CARRIER PROTEIN
+S	MOC13
+T	MOC31

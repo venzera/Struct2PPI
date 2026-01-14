@@ -1,0 +1,93 @@
+# Chain pairs sorted by binding strength (strongest first)
+# More negative ΔG = stronger binding
+====================================================================================================
+
+Rank  Chain Pair     ΔG (kcal/mol)     Kd (M)         Chain 1                       Chain 2                       
+----------------------------------------------------------------------------------------------------
+1     E-H            -43.90            5.8e-33        UNCHARACTERIZED 341.7 KDA PR..FLAGELLAR ASSOCIATED PROTEIN  
+2     D-G            -43.50            1.2e-32        AAA+ ATPASE DOMAIN-CONTAININ..AAA+ ATPASE DOMAIN-CONTAININ..
+3     E-F            -42.80            4.0e-32        UNCHARACTERIZED 341.7 KDA PR..AAA+ ATPASE DOMAIN-CONTAININ..
+4     C-E            -39.40            1.3e-29        4FE-4S FERREDOXIN-TYPE DOMAI..UNCHARACTERIZED 341.7 KDA PR..
+5     A-B            -38.90            2.7e-29        CTAP1                         FHL2                          
+6     E-G            -38.70            4.3e-29        UNCHARACTERIZED 341.7 KDA PR..AAA+ ATPASE DOMAIN-CONTAININ..
+7     D-E            -37.90            1.7e-28        AAA+ ATPASE DOMAIN-CONTAININ..UNCHARACTERIZED 341.7 KDA PR..
+8     E-J            -27.10            1.4e-20        UNCHARACTERIZED 341.7 KDA PR..FAXL                          
+9     B-E            -26.10            6.9e-20        FHL2                          UNCHARACTERIZED 341.7 KDA PR..
+10    C-D            -26.00            8.7e-20        4FE-4S FERREDOXIN-TYPE DOMAI..AAA+ ATPASE DOMAIN-CONTAININ..
+11    E-P            -25.30            2.9e-19        UNCHARACTERIZED 341.7 KDA PR..PCYA1                         
+12    B-D            -24.40            1.3e-18        FHL2                          AAA+ ATPASE DOMAIN-CONTAININ..
+13    A-E            -24.30            1.4e-18        CTAP1                         UNCHARACTERIZED 341.7 KDA PR..
+14    A-F            -21.80            1.1e-16        CTAP1                         AAA+ ATPASE DOMAIN-CONTAININ..
+15    E-S            -19.30            6.4e-15        UNCHARACTERIZED 341.7 KDA PR..MOC13                         
+16    H-I            -15.40            4.7e-12        FLAGELLAR ASSOCIATED PROTEIN  TIC22                         
+17    E-M            -13.70            9.6e-11        UNCHARACTERIZED 341.7 KDA PR..MOC29                         
+18    E-N            -13.70            9.4e-11        UNCHARACTERIZED 341.7 KDA PR..MOC34                         
+19    C-G            -13.30            1.6e-10        4FE-4S FERREDOXIN-TYPE DOMAI..AAA+ ATPASE DOMAIN-CONTAININ..
+20    F-Q            -12.60            5.3e-10        AAA+ ATPASE DOMAIN-CONTAININ..ADP-RIBOSYLGLYCOHYDROLASE     
+21    F-J            -11.80            2.0e-09        AAA+ ATPASE DOMAIN-CONTAININ..FAXL                          
+22    J-L            -11.50            3.6e-09        FAXL                          MOC25                         
+23    E-T            -11.10            7.3e-09        UNCHARACTERIZED 341.7 KDA PR..MOC31                         
+24    E-K            -10.70            1.4e-08        UNCHARACTERIZED 341.7 KDA PR..FATTY ACID DESATURASE DOMAIN..
+25    L-R            -10.60            1.6e-08        MOC25                         ACYL CARRIER PROTEIN          
+26    E-L            -10.10            3.7e-08        UNCHARACTERIZED 341.7 KDA PR..MOC25                         
+27    L-M            -9.30             1.5e-07        MOC25                         MOC29                         
+28    A-C            -9.20             1.7e-07        CTAP1                         4FE-4S FERREDOXIN-TYPE DOMAI..
+29    C-T            -9.00             2.7e-07        4FE-4S FERREDOXIN-TYPE DOMAI..MOC31                         
+30    B-C            -8.90             3.2e-07        FHL2                          4FE-4S FERREDOXIN-TYPE DOMAI..
+31    G-N            -8.50             5.7e-07        AAA+ ATPASE DOMAIN-CONTAININ..MOC34                         
+32    A-Q            -8.20             1.0e-06        CTAP1                         ADP-RIBOSYLGLYCOHYDROLASE     
+33    D-N            -7.90             1.5e-06        AAA+ ATPASE DOMAIN-CONTAININ..MOC34                         
+34    E-O            -7.60             2.9e-06        UNCHARACTERIZED 341.7 KDA PR..MOC45                         
+35    J-K            -7.50             3.2e-06        FAXL                          FATTY ACID DESATURASE DOMAIN..
+36    A-S            -7.30             4.1e-06        CTAP1                         MOC13                         
+37    F-S            -7.30             4.2e-06        AAA+ ATPASE DOMAIN-CONTAININ..MOC13                         
+38    F-G            -7.20             5.5e-06        AAA+ ATPASE DOMAIN-CONTAININ..AAA+ ATPASE DOMAIN-CONTAININ..
+39    A-T            -7.10             5.8e-06        CTAP1                         MOC31                         
+40    G-H            -6.90             9.0e-06        AAA+ ATPASE DOMAIN-CONTAININ..FLAGELLAR ASSOCIATED PROTEIN  
+41    F-L            -6.60             1.4e-05        AAA+ ATPASE DOMAIN-CONTAININ..MOC25                         
+42    F-P            -6.60             1.5e-05        AAA+ ATPASE DOMAIN-CONTAININ..PCYA1                         
+43    E-I            -6.30             2.4e-05        UNCHARACTERIZED 341.7 KDA PR..TIC22                         
+44    G-J            -6.00             4.0e-05        AAA+ ATPASE DOMAIN-CONTAININ..FAXL                          
+45    M-O            -6.00             3.7e-05        MOC29                         MOC45                         
+46    B-T            -5.80             5.7e-05        FHL2                          MOC31                         
+47    B-S            -5.70             7.1e-05        FHL2                          MOC13                         
+48    G-P            -5.50             9.3e-05        AAA+ ATPASE DOMAIN-CONTAININ..PCYA1                         
+49    C-S            -5.10             1.8e-04        4FE-4S FERREDOXIN-TYPE DOMAI..MOC13                         
+50    K-P            -5.10             1.7e-04        FATTY ACID DESATURASE DOMAIN..PCYA1                         
+51    G-O            -4.90             2.8e-04        AAA+ ATPASE DOMAIN-CONTAININ..MOC45                         
+52    G-S            -4.80             3.0e-04        AAA+ ATPASE DOMAIN-CONTAININ..MOC13                         
+53    J-M            -4.70             3.5e-04        FAXL                          MOC29                         
+54    H-O            -4.60             4.4e-04        FLAGELLAR ASSOCIATED PROTEIN  MOC45                         
+55    J-P            -4.60             3.9e-04        FAXL                          PCYA1                         
+56    A-D            -4.40             5.8e-04        CTAP1                         AAA+ ATPASE DOMAIN-CONTAININ..
+57    L-S            -4.20             8.5e-04        MOC25                         MOC13                         
+58    D-H            -4.10             1.0e-03        AAA+ ATPASE DOMAIN-CONTAININ..FLAGELLAR ASSOCIATED PROTEIN  
+59    F-R            -4.10             9.3e-04        AAA+ ATPASE DOMAIN-CONTAININ..ACYL CARRIER PROTEIN          
+60    M-S            -4.00             1.2e-03        MOC29                         MOC13                         
+61    C-I            -3.90             1.5e-03        4FE-4S FERREDOXIN-TYPE DOMAI..TIC22                         
+62    I-K            -3.90             1.4e-03        TIC22                         FATTY ACID DESATURASE DOMAIN..
+63    A-G            -3.80             1.7e-03        CTAP1                         AAA+ ATPASE DOMAIN-CONTAININ..
+64    A-I            -3.70             2.0e-03        CTAP1                         TIC22                         
+65    G-M            -3.70             1.8e-03        AAA+ ATPASE DOMAIN-CONTAININ..MOC29                         
+66    O-S            -3.70             2.1e-03        MOC45                         MOC13                         
+67    D-M            -3.50             2.6e-03        AAA+ ATPASE DOMAIN-CONTAININ..MOC29                         
+68    C-O            -3.40             3.5e-03        4FE-4S FERREDOXIN-TYPE DOMAI..MOC45                         
+69    F-H            -3.40             3.2e-03        AAA+ ATPASE DOMAIN-CONTAININ..FLAGELLAR ASSOCIATED PROTEIN  
+70    F-I            -3.40             3.1e-03        AAA+ ATPASE DOMAIN-CONTAININ..TIC22                         
+71    L-P            -3.30             3.6e-03        MOC25                         PCYA1                         
+72    C-F            -3.20             4.3e-03        4FE-4S FERREDOXIN-TYPE DOMAI..AAA+ ATPASE DOMAIN-CONTAININ..
+73    D-F            -3.20             4.2e-03        AAA+ ATPASE DOMAIN-CONTAININ..AAA+ ATPASE DOMAIN-CONTAININ..
+74    F-M            -3.10             5.4e-03        AAA+ ATPASE DOMAIN-CONTAININ..MOC29                         
+75    J-S            -3.10             4.9e-03        FAXL                          MOC13                         
+76    S-T            -3.10             5.5e-03        MOC13                         MOC31                         
+77    D-O            -2.90             7.9e-03        AAA+ ATPASE DOMAIN-CONTAININ..MOC45                         
+78    C-H            -2.70             1.0e-02        4FE-4S FERREDOXIN-TYPE DOMAI..FLAGELLAR ASSOCIATED PROTEIN  
+79    J-R            -2.40             1.7e-02        FAXL                          ACYL CARRIER PROTEIN          
+80    H-M            -2.30             2.1e-02        FLAGELLAR ASSOCIATED PROTEIN  MOC29                         
+81    H-N            -2.30             1.9e-02        FLAGELLAR ASSOCIATED PROTEIN  MOC34                         
+
+====================================================================================================
+
+Total pairs with binding data: 81
+Strongest interaction: E-H (ΔG = -43.90 kcal/mol)
+Weakest interaction: H-N (ΔG = -2.30 kcal/mol)

@@ -1,8 +1,8 @@
-Chain Pair	Chain 1 Description	Chain 2 Description	Contacts	Interacting Residues
-========================================================================================================================
+Chain Pair	Chain 1 Description	Chain 2 Description	Contacts	ΔG (kcal/mol)	Kd (M)	Interacting Residues
+============================================================================================================================================
 
-A-B	Ctap1	Fhl2	422 contacts
---------------------------------------------------------------------------------
+A-B	CTAP1	FHL2	422 contacts	ΔG: -38.90	Kd: 2.7e-29
+----------------------------------------------------------------------------------------------------
   A:ALA101 <-> B:LEU50
   A:ALA101 <-> B:TYR51
   A:ALA53 <-> B:ALA186
@@ -426,8 +426,8 @@ A-B	Ctap1	Fhl2	422 contacts
   A:VAL947 <-> B:ASP907
   A:VAL947 <-> B:MET910
 
-A-C	Ctap1	4Fe-4S ferredoxin-type domain-containing protein	76 contacts
---------------------------------------------------------------------------------
+A-C	CTAP1	4FE-4S FERREDOXIN-TYPE DOMAIN-CONTAINING PROTEIN	76 contacts	ΔG: -9.20	Kd: 1.7e-07
+----------------------------------------------------------------------------------------------------
   A:ALA177 <-> C:ALA350
   A:ALA177 <-> C:THR355
   A:ALA177 <-> C:VAL349
@@ -505,8 +505,8 @@ A-C	Ctap1	4Fe-4S ferredoxin-type domain-containing protein	76 contacts
   A:VAL229 <-> C:LYS342
   A:VAL229 <-> C:TYR343
 
-A-D	Ctap1	AAA+ ATPase domain-containing protein	10 contacts
---------------------------------------------------------------------------------
+A-D	CTAP1	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	10 contacts	ΔG: -4.40	Kd: 5.8e-04
+----------------------------------------------------------------------------------------------------
   A:ALA940 <-> D:THR1143
   A:ASP938 <-> D:GLU1144
   A:ASP938 <-> D:THR1143
@@ -518,8 +518,8 @@ A-D	Ctap1	AAA+ ATPase domain-containing protein	10 contacts
   A:PRO942 <-> D:THR1143
   A:TYR941 <-> D:THR1143
 
-A-E	Ctap1	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	233 contacts
---------------------------------------------------------------------------------
+A-E	CTAP1	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	233 contacts	ΔG: -24.30	Kd: 1.4e-18
+----------------------------------------------------------------------------------------------------
   A:ALA119 <-> E:LEU821
   A:ALA223 <-> E:LYS1369
   A:ALA716 <-> E:GLN2132
@@ -754,8 +754,8 @@ A-E	Ctap1	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	233 c
   A:VAL828 <-> E:GLU2820
   A:VAL828 <-> E:LEU2824
 
-A-F	Ctap1	AAA+ ATPase domain-containing protein	201 contacts
---------------------------------------------------------------------------------
+A-F	CTAP1	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	201 contacts	ΔG: -21.80	Kd: 1.1e-16
+----------------------------------------------------------------------------------------------------
   A:ALA163 <-> F:LEU375
   A:ALA163 <-> F:VAL385
   A:ALA167 <-> F:VAL379
@@ -958,8 +958,8 @@ A-F	Ctap1	AAA+ ATPase domain-containing protein	201 contacts
   A:VAL666 <-> F:TYR637
   A:VAL851 <-> F:ILE857
 
-A-G	Ctap1	AAA+ ATPase domain-containing protein	6 contacts
---------------------------------------------------------------------------------
+A-G	CTAP1	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	6 contacts	ΔG: -3.80	Kd: 1.7e-03
+----------------------------------------------------------------------------------------------------
   A:ASP939 <-> G:PRO1046
   A:ASP939 <-> G:TRP1048
   A:GLU935 <-> G:ASP1047
@@ -967,15 +967,15 @@ A-G	Ctap1	AAA+ ATPase domain-containing protein	6 contacts
   A:GLU935 <-> G:TRP1048
   A:TRP936 <-> G:TRP1048
 
-A-I	Ctap1	Tic22	4 contacts
---------------------------------------------------------------------------------
+A-I	CTAP1	TIC22	4 contacts	ΔG: -3.70	Kd: 2.0e-03
+----------------------------------------------------------------------------------------------------
   A:ALA177 <-> I:ARG194
   A:ALA177 <-> I:ASP195
   A:HIS178 <-> I:ARG194
   A:PRO236 <-> I:ARG194
 
-A-Q	Ctap1	ADP-ribosylglycohydrolase	50 contacts
---------------------------------------------------------------------------------
+A-Q	CTAP1	ADP-RIBOSYLGLYCOHYDROLASE	50 contacts	ΔG: -8.20	Kd: 1.0e-06
+----------------------------------------------------------------------------------------------------
   A:ALA673 <-> Q:ARG265
   A:ALA755 <-> Q:ARG140
   A:ALA755 <-> Q:ARG143
@@ -1027,8 +1027,8 @@ A-Q	Ctap1	ADP-ribosylglycohydrolase	50 contacts
   A:TRP874 <-> Q:TYR152
   A:VAL678 <-> Q:ILE154
 
-A-S	Ctap1	Moc13	44 contacts
---------------------------------------------------------------------------------
+A-S	CTAP1	MOC13	44 contacts	ΔG: -7.30	Kd: 4.1e-06
+----------------------------------------------------------------------------------------------------
   A:ALA101 <-> S:GLU13
   A:ALA101 <-> S:LEU14
   A:ALA304 <-> S:ALA45
@@ -1074,8 +1074,8 @@ A-S	Ctap1	Moc13	44 contacts
   A:VAL305 <-> S:GLN50
   A:VAL305 <-> S:GLU49
 
-A-T	Ctap1	Moc31	40 contacts
---------------------------------------------------------------------------------
+A-T	CTAP1	MOC31	40 contacts	ΔG: -7.10	Kd: 5.8e-06
+----------------------------------------------------------------------------------------------------
   A:ALA115 <-> T:TYR118
   A:ALA134 <-> T:TYR118
   A:ALA53 <-> T:GLU117
@@ -1117,8 +1117,8 @@ A-T	Ctap1	Moc31	40 contacts
   A:THR54 <-> T:TYR118
   A:THR87 <-> T:TRP112
 
-B-C	Fhl2	4Fe-4S ferredoxin-type domain-containing protein	69 contacts
---------------------------------------------------------------------------------
+B-C	FHL2	4FE-4S FERREDOXIN-TYPE DOMAIN-CONTAINING PROTEIN	69 contacts	ΔG: -8.90	Kd: 3.2e-07
+----------------------------------------------------------------------------------------------------
   B:ALA113 <-> C:ARG114
   B:ALA113 <-> C:VAL115
   B:ALA143 <-> C:GLU363
@@ -1189,8 +1189,8 @@ B-C	Fhl2	4Fe-4S ferredoxin-type domain-containing protein	69 contacts
   B:TYR153 <-> C:ARG114
   B:TYR153 <-> C:CYS113
 
-B-D	Fhl2	AAA+ ATPase domain-containing protein	238 contacts
---------------------------------------------------------------------------------
+B-D	FHL2	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	238 contacts	ΔG: -24.40	Kd: 1.3e-18
+----------------------------------------------------------------------------------------------------
   B:ALA532 <-> D:ALA671
   B:ALA532 <-> D:ASN668
   B:ALA532 <-> D:ILE672
@@ -1430,8 +1430,8 @@ B-D	Fhl2	AAA+ ATPase domain-containing protein	238 contacts
   B:VAL811 <-> D:LEU818
   B:VAL811 <-> D:SER817
 
-B-E	Fhl2	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	282 contacts
---------------------------------------------------------------------------------
+B-E	FHL2	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	282 contacts	ΔG: -26.10	Kd: 6.9e-20
+----------------------------------------------------------------------------------------------------
   B:ALA165 <-> E:ARG809
   B:ALA166 <-> E:ARG809
   B:ALA166 <-> E:LEU810
@@ -1715,8 +1715,8 @@ B-E	Fhl2	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	282 co
   B:VAL895 <-> E:PRO2875
   B:VAL895 <-> E:TYR2873
 
-B-S	Fhl2	Moc13	47 contacts
---------------------------------------------------------------------------------
+B-S	FHL2	MOC13	47 contacts	ΔG: -5.70	Kd: 7.1e-05
+----------------------------------------------------------------------------------------------------
   B:ALA25 <-> S:ALA9
   B:ALA25 <-> S:GLU8
   B:ALA25 <-> S:ILE10
@@ -1765,8 +1765,8 @@ B-S	Fhl2	Moc13	47 contacts
   B:TYR51 <-> S:LEU15
   B:VAL31 <-> S:LEU16
 
-B-T	Fhl2	Moc31	34 contacts
---------------------------------------------------------------------------------
+B-T	FHL2	MOC31	34 contacts	ΔG: -5.80	Kd: 5.7e-05
+----------------------------------------------------------------------------------------------------
   B:ALA184 <-> T:ARG98
   B:ALA184 <-> T:GLU117
   B:ALA184 <-> T:LYS114
@@ -1802,8 +1802,8 @@ B-T	Fhl2	Moc31	34 contacts
   B:VAL185 <-> T:GLU117
   B:VAL185 <-> T:LYS114
 
-C-D	4Fe-4S ferredoxin-type domain-containing protein	AAA+ ATPase domain-containing protein	284 contacts
---------------------------------------------------------------------------------
+C-D	4FE-4S FERREDOXIN-TYPE DOMAIN-CONTAINING PROTEIN	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	284 contacts	ΔG: -26.00	Kd: 8.7e-20
+----------------------------------------------------------------------------------------------------
   C:ALA119 <-> D:ILE197
   C:ALA119 <-> D:SER198
   C:ALA121 <-> D:ARG196
@@ -2089,8 +2089,8 @@ C-D	4Fe-4S ferredoxin-type domain-containing protein	AAA+ ATPase domain-containi
   C:VAL66 <-> D:LEU288
   C:VAL66 <-> D:PRO289
 
-C-E	4Fe-4S ferredoxin-type domain-containing protein	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	395 contacts
---------------------------------------------------------------------------------
+C-E	4FE-4S FERREDOXIN-TYPE DOMAIN-CONTAINING PROTEIN	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	395 contacts	ΔG: -39.40	Kd: 1.3e-29
+----------------------------------------------------------------------------------------------------
   C:ALA140 <-> E:ARG988
   C:ALA140 <-> E:GLU987
   C:ALA140 <-> E:PHE984
@@ -2487,12 +2487,12 @@ C-E	4Fe-4S ferredoxin-type domain-containing protein	Uncharacterized 341.7 kDa p
   C:VAL43 <-> E:PHE1419
   C:VAL43 <-> E:VAL1416
 
-C-F	4Fe-4S ferredoxin-type domain-containing protein	AAA+ ATPase domain-containing protein	1 contacts
---------------------------------------------------------------------------------
+C-F	4FE-4S FERREDOXIN-TYPE DOMAIN-CONTAINING PROTEIN	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	1 contacts	ΔG: -3.20	Kd: 4.3e-03
+----------------------------------------------------------------------------------------------------
   C:PHE319 <-> F:LEU404
 
-C-G	4Fe-4S ferredoxin-type domain-containing protein	AAA+ ATPase domain-containing protein	123 contacts
---------------------------------------------------------------------------------
+C-G	4FE-4S FERREDOXIN-TYPE DOMAIN-CONTAINING PROTEIN	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	123 contacts	ΔG: -13.30	Kd: 1.6e-10
+----------------------------------------------------------------------------------------------------
   C:ALA145 <-> G:ALA211
   C:ALA145 <-> G:ARG207
   C:ALA145 <-> G:VAL210
@@ -2617,26 +2617,26 @@ C-G	4Fe-4S ferredoxin-type domain-containing protein	AAA+ ATPase domain-containi
   C:VAL387 <-> G:TYR148
   C:VAL388 <-> G:TYR148
 
-C-H	4Fe-4S ferredoxin-type domain-containing protein	Flagellar associated protein	4 contacts
---------------------------------------------------------------------------------
+C-H	4FE-4S FERREDOXIN-TYPE DOMAIN-CONTAINING PROTEIN	FLAGELLAR ASSOCIATED PROTEIN	4 contacts	ΔG: -2.70	Kd: 1.0e-02
+----------------------------------------------------------------------------------------------------
   C:ALA386 <-> H:ALA192
   C:ALA386 <-> H:ARG194
   C:VAL387 <-> H:ALA192
   C:VAL387 <-> H:PRO191
 
-C-I	4Fe-4S ferredoxin-type domain-containing protein	Tic22	4 contacts
---------------------------------------------------------------------------------
+C-I	4FE-4S FERREDOXIN-TYPE DOMAIN-CONTAINING PROTEIN	TIC22	4 contacts	ΔG: -3.90	Kd: 1.5e-03
+----------------------------------------------------------------------------------------------------
   C:ALA350 <-> I:ASP195
   C:ARG354 <-> I:ASP195
   C:VAL349 <-> I:ARG194
   C:VAL349 <-> I:ASP195
 
-C-O	4Fe-4S ferredoxin-type domain-containing protein	Moc45	1 contacts
---------------------------------------------------------------------------------
+C-O	4FE-4S FERREDOXIN-TYPE DOMAIN-CONTAINING PROTEIN	MOC45	1 contacts	ΔG: -3.40	Kd: 3.5e-03
+----------------------------------------------------------------------------------------------------
   C:PHE42 <-> O:TRP434
 
-C-S	4Fe-4S ferredoxin-type domain-containing protein	Moc13	24 contacts
---------------------------------------------------------------------------------
+C-S	4FE-4S FERREDOXIN-TYPE DOMAIN-CONTAINING PROTEIN	MOC13	24 contacts	ΔG: -5.10	Kd: 1.8e-04
+----------------------------------------------------------------------------------------------------
   C:ARG7 <-> S:ASP101
   C:ARG7 <-> S:GLY102
   C:ASP10 <-> S:ASN99
@@ -2662,8 +2662,8 @@ C-S	4Fe-4S ferredoxin-type domain-containing protein	Moc13	24 contacts
   C:TYR14 <-> S:TYR97
   C:VAL15 <-> S:MET100
 
-C-T	4Fe-4S ferredoxin-type domain-containing protein	Moc31	75 contacts
---------------------------------------------------------------------------------
+C-T	4FE-4S FERREDOXIN-TYPE DOMAIN-CONTAINING PROTEIN	MOC31	75 contacts	ΔG: -9.00	Kd: 2.7e-07
+----------------------------------------------------------------------------------------------------
   C:ALA198 <-> T:TYR27
   C:ALA199 <-> T:ILE35
   C:ALA199 <-> T:PHE23
@@ -2740,8 +2740,8 @@ C-T	4Fe-4S ferredoxin-type domain-containing protein	Moc31	75 contacts
   C:TRP204 <-> T:PHE46
   C:TRP204 <-> T:PRO40
 
-D-E	AAA+ ATPase domain-containing protein	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	356 contacts
---------------------------------------------------------------------------------
+D-E	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	356 contacts	ΔG: -37.90	Kd: 1.7e-28
+----------------------------------------------------------------------------------------------------
   D:ALA1105 <-> E:LEU2602
   D:ALA1105 <-> E:MET2643
   D:ALA1148 <-> E:ASN2884
@@ -3099,13 +3099,13 @@ D-E	AAA+ ATPase domain-containing protein	Uncharacterized 341.7 kDa protein in p
   D:VAL793 <-> E:THR2787
   D:VAL793 <-> E:TYR2792
 
-D-F	AAA+ ATPase domain-containing protein	AAA+ ATPase domain-containing protein	2 contacts
---------------------------------------------------------------------------------
+D-F	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	2 contacts	ΔG: -3.20	Kd: 4.2e-03
+----------------------------------------------------------------------------------------------------
   D:ARG863 <-> F:ASP885
   D:ASN1117 <-> F:TYR1019
 
-D-G	AAA+ ATPase domain-containing protein	AAA+ ATPase domain-containing protein	501 contacts
---------------------------------------------------------------------------------
+D-G	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	501 contacts	ΔG: -43.50	Kd: 1.2e-32
+----------------------------------------------------------------------------------------------------
   D:ALA1092 <-> G:ALA922
   D:ALA1092 <-> G:ILE923
   D:ALA1092 <-> G:ILE956
@@ -3608,8 +3608,8 @@ D-G	AAA+ ATPase domain-containing protein	AAA+ ATPase domain-containing protein	
   D:VAL840 <-> G:MET826
   D:VAL840 <-> G:THR827
 
-D-H	AAA+ ATPase domain-containing protein	Flagellar associated protein	26 contacts
---------------------------------------------------------------------------------
+D-H	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	FLAGELLAR ASSOCIATED PROTEIN	26 contacts	ΔG: -4.10	Kd: 1.0e-03
+----------------------------------------------------------------------------------------------------
   D:ALA122 <-> H:ASP431
   D:ALA122 <-> H:GLU432
   D:ALA310 <-> H:ALA184
@@ -3637,8 +3637,8 @@ D-H	AAA+ ATPase domain-containing protein	Flagellar associated protein	26 contac
   D:VAL311 <-> H:PRO195
   D:VAL311 <-> H:VAL185
 
-D-M	AAA+ ATPase domain-containing protein	Moc29	9 contacts
---------------------------------------------------------------------------------
+D-M	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	MOC29	9 contacts	ΔG: -3.50	Kd: 2.6e-03
+----------------------------------------------------------------------------------------------------
   D:ARG142 <-> M:HIS199
   D:GLY145 <-> M:HIS199
   D:GLY145 <-> M:PRO197
@@ -3649,8 +3649,8 @@ D-M	AAA+ ATPase domain-containing protein	Moc29	9 contacts
   D:TYR141 <-> M:PRO197
   D:VAL146 <-> M:TRP202
 
-D-N	AAA+ ATPase domain-containing protein	Moc34	78 contacts
---------------------------------------------------------------------------------
+D-N	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	MOC34	78 contacts	ΔG: -7.90	Kd: 1.5e-06
+----------------------------------------------------------------------------------------------------
   D:ALA163 <-> N:VAL28
   D:ALA165 <-> N:HIS32
   D:ALA170 <-> N:TYR25
@@ -3730,12 +3730,12 @@ D-N	AAA+ ATPase domain-containing protein	Moc34	78 contacts
   D:VAL253 <-> N:ALA115
   D:VAL253 <-> N:LEU119
 
-D-O	AAA+ ATPase domain-containing protein	Moc45	1 contacts
---------------------------------------------------------------------------------
+D-O	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	MOC45	1 contacts	ΔG: -2.90	Kd: 7.9e-03
+----------------------------------------------------------------------------------------------------
   D:VAL146 <-> O:PHE424
 
-E-F	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	AAA+ ATPase domain-containing protein	432 contacts
---------------------------------------------------------------------------------
+E-F	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	432 contacts	ΔG: -42.80	Kd: 4.0e-32
+----------------------------------------------------------------------------------------------------
   E:ALA2076 <-> F:ILE438
   E:ALA2078 <-> F:ARG434
   E:ALA2078 <-> F:LYS431
@@ -4169,8 +4169,8 @@ E-F	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	AAA+ ATPase
   E:VAL2677 <-> F:VAL906
   E:VAL2677 <-> F:VAL907
 
-E-G	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	AAA+ ATPase domain-containing protein	448 contacts
---------------------------------------------------------------------------------
+E-G	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	448 contacts	ΔG: -38.70	Kd: 4.3e-29
+----------------------------------------------------------------------------------------------------
   E:ALA1780 <-> G:GLU443
   E:ALA1787 <-> G:PHE453
   E:ALA1796 <-> G:LEU445
@@ -4620,8 +4620,8 @@ E-G	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	AAA+ ATPase
   E:VAL2902 <-> G:ILE857
   E:VAL339 <-> G:LEU399
 
-E-H	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Flagellar associated protein	387 contacts
---------------------------------------------------------------------------------
+E-H	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	FLAGELLAR ASSOCIATED PROTEIN	387 contacts	ΔG: -43.90	Kd: 5.8e-33
+----------------------------------------------------------------------------------------------------
   E:ALA543 <-> H:ALA221
   E:ALA543 <-> H:GLY229
   E:ALA543 <-> H:LEU226
@@ -5010,8 +5010,8 @@ E-H	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Flagellar a
   E:VAL749 <-> H:MET216
   E:VAL749 <-> H:SER217
 
-E-I	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Tic22	24 contacts
---------------------------------------------------------------------------------
+E-I	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	TIC22	24 contacts	ΔG: -6.30	Kd: 2.4e-05
+----------------------------------------------------------------------------------------------------
   E:ALA468 <-> I:MET296
   E:ASN457 <-> I:GLN144
   E:ASN457 <-> I:PRO141
@@ -5037,8 +5037,8 @@ E-I	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Tic22	24 co
   E:PHE456 <-> I:GLN144
   E:TYR460 <-> I:PRO141
 
-E-J	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	FaxL	242 contacts
---------------------------------------------------------------------------------
+E-J	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	FAXL	242 contacts	ΔG: -27.10	Kd: 1.4e-20
+----------------------------------------------------------------------------------------------------
   E:ALA2361 <-> J:ASP345
   E:ALA2361 <-> J:PRO344
   E:ALA2361 <-> J:SER343
@@ -5282,8 +5282,8 @@ E-J	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	FaxL	242 co
   E:VAL2407 <-> J:VAL117
   E:VAL322 <-> J:TRP356
 
-E-K	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Fatty acid desaturase domain-containing protein	60 contacts
---------------------------------------------------------------------------------
+E-K	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	FATTY ACID DESATURASE DOMAIN-CONTAINING PROTEIN	60 contacts	ΔG: -10.70	Kd: 1.4e-08
+----------------------------------------------------------------------------------------------------
   E:ASN2374 <-> K:ALA263
   E:ASN2374 <-> K:GLU267
   E:ASN2374 <-> K:PRO262
@@ -5345,8 +5345,8 @@ E-K	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Fatty acid 
   E:TYR268 <-> K:PHE260
   E:TYR268 <-> K:PRO262
 
-E-L	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Moc25	59 contacts
---------------------------------------------------------------------------------
+E-L	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	MOC25	59 contacts	ΔG: -10.10	Kd: 3.7e-08
+----------------------------------------------------------------------------------------------------
   E:ALA2361 <-> L:TRP101
   E:ARG1692 <-> L:GLY123
   E:ARG1745 <-> L:GLN118
@@ -5407,8 +5407,8 @@ E-L	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Moc25	59 co
   E:TYR1989 <-> L:GLN89
   E:VAL2001 <-> L:PHE92
 
-E-M	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Moc29	109 contacts
---------------------------------------------------------------------------------
+E-M	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	MOC29	109 contacts	ΔG: -13.70	Kd: 9.6e-11
+----------------------------------------------------------------------------------------------------
   E:ALA340 <-> M:ALA191
   E:ALA340 <-> M:LEU195
   E:ALA340 <-> M:TYR194
@@ -5519,8 +5519,8 @@ E-M	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Moc29	109 c
   E:VAL322 <-> M:PRO224
   E:VAL339 <-> M:LEU195
 
-E-N	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Moc34	110 contacts
---------------------------------------------------------------------------------
+E-N	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	MOC34	110 contacts	ΔG: -13.70	Kd: 9.4e-11
+----------------------------------------------------------------------------------------------------
   E:ALA908 <-> N:GLU109
   E:ALA908 <-> N:GLU112
   E:ARG966 <-> N:ARG96
@@ -5632,8 +5632,8 @@ E-N	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Moc34	110 c
   E:VAL1322 <-> N:MET20
   E:VAL1322 <-> N:PRO21
 
-E-O	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Moc45	43 contacts
---------------------------------------------------------------------------------
+E-O	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	MOC45	43 contacts	ΔG: -7.60	Kd: 2.9e-06
+----------------------------------------------------------------------------------------------------
   E:ARG1417 <-> O:THR438
   E:ASP1670 <-> O:ALA441
   E:GLN1415 <-> O:TRP434
@@ -5678,8 +5678,8 @@ E-O	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Moc45	43 co
   E:THR330 <-> O:LYS437
   E:THR330 <-> O:SER435
 
-E-P	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	PcyA1	204 contacts
---------------------------------------------------------------------------------
+E-P	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	PCYA1	204 contacts	ΔG: -25.30	Kd: 2.9e-19
+----------------------------------------------------------------------------------------------------
   E:ALA2938 <-> P:GLU90
   E:ALA2938 <-> P:VAL88
   E:ALA2942 <-> P:ALA87
@@ -5885,8 +5885,8 @@ E-P	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	PcyA1	204 c
   E:VAL2422 <-> P:ILE84
   E:VAL2422 <-> P:THR85
 
-E-S	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Moc13	160 contacts
---------------------------------------------------------------------------------
+E-S	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	MOC13	160 contacts	ΔG: -19.30	Kd: 6.4e-15
+----------------------------------------------------------------------------------------------------
   E:ALA1660 <-> S:ARG105
   E:ARG1692 <-> S:ASN67
   E:ARG1692 <-> S:GLY72
@@ -6048,8 +6048,8 @@ E-S	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Moc13	160 c
   E:VAL1665 <-> S:VAL106
   E:VAL1679 <-> S:SER114
 
-E-T	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Moc31	47 contacts
---------------------------------------------------------------------------------
+E-T	UNCHARACTERIZED 341.7 KDA PROTEIN IN PSBD-PSBC INTERGENIC	MOC31	47 contacts	ΔG: -11.10	Kd: 7.3e-09
+----------------------------------------------------------------------------------------------------
   E:ARG882 <-> T:ALA37
   E:ARG882 <-> T:ARG36
   E:ARG882 <-> T:LEU38
@@ -6098,8 +6098,8 @@ E-T	Uncharacterized 341.7 kDa protein in psbD-psbC intergenic region	Moc31	47 co
   E:TYR992 <-> T:PRO40
   E:TYR992 <-> T:PRO45
 
-F-G	AAA+ ATPase domain-containing protein	AAA+ ATPase domain-containing protein	58 contacts
---------------------------------------------------------------------------------
+F-G	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	58 contacts	ΔG: -7.20	Kd: 5.5e-06
+----------------------------------------------------------------------------------------------------
   F:ALA1021 <-> G:PRO1038
   F:ALA904 <-> G:ARG1055
   F:ALA904 <-> G:TYR1056
@@ -6159,8 +6159,8 @@ F-G	AAA+ ATPase domain-containing protein	AAA+ ATPase domain-containing protein	
   F:VAL907 <-> G:ARG1055
   F:VAL907 <-> G:TYR1056
 
-F-H	AAA+ ATPase domain-containing protein	Flagellar associated protein	7 contacts
---------------------------------------------------------------------------------
+F-H	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	FLAGELLAR ASSOCIATED PROTEIN	7 contacts	ΔG: -3.40	Kd: 3.2e-03
+----------------------------------------------------------------------------------------------------
   F:ARG354 <-> H:ARG540
   F:ASN381 <-> H:ASP541
   F:GLU333 <-> H:ARG540
@@ -6169,14 +6169,14 @@ F-H	AAA+ ATPase domain-containing protein	Flagellar associated protein	7 contact
   F:GLY334 <-> H:ARG540
   F:SER380 <-> H:ASP541
 
-F-I	AAA+ ATPase domain-containing protein	Tic22	3 contacts
---------------------------------------------------------------------------------
+F-I	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	TIC22	3 contacts	ΔG: -3.40	Kd: 3.1e-03
+----------------------------------------------------------------------------------------------------
   F:ASP376 <-> I:ARG194
   F:GLU333 <-> I:LEU319
   F:GLU373 <-> I:ARG194
 
-F-J	AAA+ ATPase domain-containing protein	FaxL	119 contacts
---------------------------------------------------------------------------------
+F-J	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	FAXL	119 contacts	ΔG: -11.80	Kd: 2.0e-09
+----------------------------------------------------------------------------------------------------
   F:ALA312 <-> J:GLN292
   F:ALA312 <-> J:GLU241
   F:ALA355 <-> J:ARG297
@@ -6297,8 +6297,8 @@ F-J	AAA+ ATPase domain-containing protein	FaxL	119 contacts
   F:VAL820 <-> J:ALA78
   F:VAL820 <-> J:PRO79
 
-F-L	AAA+ ATPase domain-containing protein	Moc25	39 contacts
---------------------------------------------------------------------------------
+F-L	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	MOC25	39 contacts	ΔG: -6.60	Kd: 1.4e-05
+----------------------------------------------------------------------------------------------------
   F:ALA691 <-> L:ARG81
   F:ALA692 <-> L:MET76
   F:ALA692 <-> L:TRP88
@@ -6339,13 +6339,13 @@ F-L	AAA+ ATPase domain-containing protein	Moc25	39 contacts
   F:PRO776 <-> L:GLU82
   F:VAL774 <-> L:ARG80
 
-F-M	AAA+ ATPase domain-containing protein	Moc29	2 contacts
---------------------------------------------------------------------------------
+F-M	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	MOC29	2 contacts	ΔG: -3.10	Kd: 5.4e-03
+----------------------------------------------------------------------------------------------------
   F:HIS697 <-> M:ASN151
   F:HIS697 <-> M:GLN147
 
-F-P	AAA+ ATPase domain-containing protein	PcyA1	38 contacts
---------------------------------------------------------------------------------
+F-P	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	PCYA1	38 contacts	ΔG: -6.60	Kd: 1.5e-05
+----------------------------------------------------------------------------------------------------
   F:ALA1008 <-> P:ASP155
   F:ALA1008 <-> P:GLU159
   F:ALA1008 <-> P:ILE168
@@ -6385,8 +6385,8 @@ F-P	AAA+ ATPase domain-containing protein	PcyA1	38 contacts
   F:TRP1035 <-> P:ALA166
   F:TRP1035 <-> P:ASP167
 
-F-Q	AAA+ ATPase domain-containing protein	ADP-ribosylglycohydrolase	79 contacts
---------------------------------------------------------------------------------
+F-Q	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	ADP-RIBOSYLGLYCOHYDROLASE	79 contacts	ΔG: -12.60	Kd: 5.3e-10
+----------------------------------------------------------------------------------------------------
   F:ALA770 <-> Q:SER260
   F:ALA770 <-> Q:SER261
   F:ALA947 <-> Q:SER262
@@ -6467,8 +6467,8 @@ F-Q	AAA+ ATPase domain-containing protein	ADP-ribosylglycohydrolase	79 contacts
   F:TYR962 <-> Q:ARG140
   F:TYR962 <-> Q:PHE136
 
-F-R	AAA+ ATPase domain-containing protein	Acyl carrier protein	6 contacts
---------------------------------------------------------------------------------
+F-R	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	ACYL CARRIER PROTEIN	6 contacts	ΔG: -4.10	Kd: 9.3e-04
+----------------------------------------------------------------------------------------------------
   F:ARG746 <-> R:ALA6
   F:ARG938 <-> R:ALA10
   F:ARG938 <-> R:ASP8
@@ -6476,8 +6476,8 @@ F-R	AAA+ ATPase domain-containing protein	Acyl carrier protein	6 contacts
   F:ASP937 <-> R:LYS9
   F:ASP937 <-> R:VAL7
 
-F-S	AAA+ ATPase domain-containing protein	Moc13	50 contacts
---------------------------------------------------------------------------------
+F-S	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	MOC13	50 contacts	ΔG: -7.30	Kd: 4.2e-06
+----------------------------------------------------------------------------------------------------
   F:ARG439 <-> S:ALA112
   F:ARG439 <-> S:ASN120
   F:ARG439 <-> S:LEU111
@@ -6529,8 +6529,8 @@ F-S	AAA+ ATPase domain-containing protein	Moc13	50 contacts
   F:TYR440 <-> S:LEU119
   F:TYR440 <-> S:VAL117
 
-G-H	AAA+ ATPase domain-containing protein	Flagellar associated protein	50 contacts
---------------------------------------------------------------------------------
+G-H	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	FLAGELLAR ASSOCIATED PROTEIN	50 contacts	ΔG: -6.90	Kd: 9.0e-06
+----------------------------------------------------------------------------------------------------
   G:ARG177 <-> H:ALA186
   G:ARG177 <-> H:ALA192
   G:ARG177 <-> H:ASP187
@@ -6582,8 +6582,8 @@ G-H	AAA+ ATPase domain-containing protein	Flagellar associated protein	50 contac
   G:VAL384 <-> H:GLY209
   G:VAL384 <-> H:VAL462
 
-G-J	AAA+ ATPase domain-containing protein	FaxL	32 contacts
---------------------------------------------------------------------------------
+G-J	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	FAXL	32 contacts	ΔG: -6.00	Kd: 4.0e-05
+----------------------------------------------------------------------------------------------------
   G:ALA504 <-> J:ARG364
   G:ALA504 <-> J:GLN362
   G:ALA504 <-> J:MET363
@@ -6617,8 +6617,8 @@ G-J	AAA+ ATPase domain-containing protein	FaxL	32 contacts
   G:TYR491 <-> J:GLN362
   G:VAL503 <-> J:VAL346
 
-G-M	AAA+ ATPase domain-containing protein	Moc29	12 contacts
---------------------------------------------------------------------------------
+G-M	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	MOC29	12 contacts	ΔG: -3.70	Kd: 1.8e-03
+----------------------------------------------------------------------------------------------------
   G:ARG396 <-> M:ASN198
   G:ARG396 <-> M:GLU193
   G:ARG396 <-> M:LEU195
@@ -6632,8 +6632,8 @@ G-M	AAA+ ATPase domain-containing protein	Moc29	12 contacts
   G:LEU400 <-> M:TRP202
   G:LEU400 <-> M:VAL196
 
-G-N	AAA+ ATPase domain-containing protein	Moc34	50 contacts
---------------------------------------------------------------------------------
+G-N	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	MOC34	50 contacts	ΔG: -8.50	Kd: 5.7e-07
+----------------------------------------------------------------------------------------------------
   G:ALA194 <-> N:ARG120
   G:ALA197 <-> N:ARG120
   G:ALA290 <-> N:ARG96
@@ -6685,8 +6685,8 @@ G-N	AAA+ ATPase domain-containing protein	Moc34	50 contacts
   G:VAL287 <-> N:GLU64
   G:VAL296 <-> N:LEU99
 
-G-O	AAA+ ATPase domain-containing protein	Moc45	23 contacts
---------------------------------------------------------------------------------
+G-O	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	MOC45	23 contacts	ΔG: -4.90	Kd: 2.8e-04
+----------------------------------------------------------------------------------------------------
   G:ARG555 <-> O:ARG440
   G:ASP559 <-> O:ARG440
   G:LEU404 <-> O:PHE424
@@ -6711,8 +6711,8 @@ G-O	AAA+ ATPase domain-containing protein	Moc45	23 contacts
   G:THR407 <-> O:VAL429
   G:VAL408 <-> O:PHE428
 
-G-P	AAA+ ATPase domain-containing protein	PcyA1	32 contacts
---------------------------------------------------------------------------------
+G-P	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	PCYA1	32 contacts	ΔG: -5.50	Kd: 9.3e-05
+----------------------------------------------------------------------------------------------------
   G:ALA496 <-> P:LEU418
   G:ARG493 <-> P:ARG426
   G:ARG501 <-> P:GLU419
@@ -6746,8 +6746,8 @@ G-P	AAA+ ATPase domain-containing protein	PcyA1	32 contacts
   G:TRP968 <-> P:PRO298
   G:TRP968 <-> P:VAL115
 
-G-S	AAA+ ATPase domain-containing protein	Moc13	19 contacts
---------------------------------------------------------------------------------
+G-S	AAA+ ATPASE DOMAIN-CONTAINING PROTEIN	MOC13	19 contacts	ΔG: -4.80	Kd: 3.0e-04
+----------------------------------------------------------------------------------------------------
   G:ARG552 <-> S:ARG96
   G:ARG552 <-> S:ASN99
   G:ARG552 <-> S:MET100
@@ -6768,8 +6768,8 @@ G-S	AAA+ ATPase domain-containing protein	Moc13	19 contacts
   G:PHE604 <-> S:LEU90
   G:VAL599 <-> S:ARG93
 
-H-I	Flagellar associated protein	Tic22	165 contacts
---------------------------------------------------------------------------------
+H-I	FLAGELLAR ASSOCIATED PROTEIN	TIC22	165 contacts	ΔG: -15.40	Kd: 4.7e-12
+----------------------------------------------------------------------------------------------------
   H:ALA538 <-> I:LEU319
   H:ALA538 <-> I:MET313
   H:ALA538 <-> I:PHE314
@@ -6936,8 +6936,8 @@ H-I	Flagellar associated protein	Tic22	165 contacts
   H:VAL542 <-> I:GLN218
   H:VAL542 <-> I:SER214
 
-H-M	Flagellar associated protein	Moc29	15 contacts
---------------------------------------------------------------------------------
+H-M	FLAGELLAR ASSOCIATED PROTEIN	MOC29	15 contacts	ΔG: -2.30	Kd: 2.1e-02
+----------------------------------------------------------------------------------------------------
   H:ARG243 <-> M:PRO252
   H:GLY247 <-> M:GLY248
   H:GLY247 <-> M:TYR249
@@ -6954,8 +6954,8 @@ H-M	Flagellar associated protein	Moc29	15 contacts
   H:TRP244 <-> M:PHE256
   H:TRP244 <-> M:PRO252
 
-H-N	Flagellar associated protein	Moc34	10 contacts
---------------------------------------------------------------------------------
+H-N	FLAGELLAR ASSOCIATED PROTEIN	MOC34	10 contacts	ΔG: -2.30	Kd: 1.9e-02
+----------------------------------------------------------------------------------------------------
   H:ALA175 <-> N:LEU126
   H:ALA175 <-> N:LEU130
   H:ASN169 <-> N:GLN131
@@ -6967,8 +6967,8 @@ H-N	Flagellar associated protein	Moc34	10 contacts
   H:PRO171 <-> N:GLN131
   H:PRO171 <-> N:LEU130
 
-H-O	Flagellar associated protein	Moc45	19 contacts
---------------------------------------------------------------------------------
+H-O	FLAGELLAR ASSOCIATED PROTEIN	MOC45	19 contacts	ΔG: -4.60	Kd: 4.4e-04
+----------------------------------------------------------------------------------------------------
   H:ARG238 <-> O:ALA368
   H:ARG239 <-> O:ALA368
   H:ARG240 <-> O:GLY370
@@ -6989,8 +6989,8 @@ H-O	Flagellar associated protein	Moc45	19 contacts
   H:TRP244 <-> O:TYR384
   H:TRP244 <-> O:VAL373
 
-I-K	Tic22	Fatty acid desaturase domain-containing protein	7 contacts
---------------------------------------------------------------------------------
+I-K	TIC22	FATTY ACID DESATURASE DOMAIN-CONTAINING PROTEIN	7 contacts	ΔG: -3.90	Kd: 1.4e-03
+----------------------------------------------------------------------------------------------------
   I:ARG119 <-> K:ILE126
   I:ARG119 <-> K:MET123
   I:ARG119 <-> K:TRP121
@@ -6999,8 +6999,8 @@ I-K	Tic22	Fatty acid desaturase domain-containing protein	7 contacts
   I:ARG122 <-> K:TYR122
   I:PRO118 <-> K:ILE126
 
-J-K	FaxL	Fatty acid desaturase domain-containing protein	61 contacts
---------------------------------------------------------------------------------
+J-K	FAXL	FATTY ACID DESATURASE DOMAIN-CONTAINING PROTEIN	61 contacts	ΔG: -7.50	Kd: 3.2e-06
+----------------------------------------------------------------------------------------------------
   J:ALA254 <-> K:LEU255
   J:ALA254 <-> K:LEU276
   J:ALA258 <-> K:LEU255
@@ -7063,8 +7063,8 @@ J-K	FaxL	Fatty acid desaturase domain-containing protein	61 contacts
   J:VAL243 <-> K:SER288
   J:VAL243 <-> K:VAL287
 
-J-L	FaxL	Moc25	109 contacts
---------------------------------------------------------------------------------
+J-L	FAXL	MOC25	109 contacts	ΔG: -11.50	Kd: 3.6e-09
+----------------------------------------------------------------------------------------------------
   J:ALA146 <-> L:ILE40
   J:ALA146 <-> L:PRO42
   J:ALA277 <-> L:PHE219
@@ -7175,8 +7175,8 @@ J-L	FaxL	Moc25	109 contacts
   J:VAL331 <-> L:PHE220
   J:VAL331 <-> L:TRP221
 
-J-M	FaxL	Moc29	20 contacts
---------------------------------------------------------------------------------
+J-M	FAXL	MOC29	20 contacts	ΔG: -4.70	Kd: 3.5e-04
+----------------------------------------------------------------------------------------------------
   J:ALA339 <-> M:ASN169
   J:ALA339 <-> M:GLU168
   J:ASN336 <-> M:ASN169
@@ -7198,8 +7198,8 @@ J-M	FaxL	Moc29	20 contacts
   J:TYR358 <-> M:TRP172
   J:TYR358 <-> M:VAL176
 
-J-P	FaxL	PcyA1	39 contacts
---------------------------------------------------------------------------------
+J-P	FAXL	PCYA1	39 contacts	ΔG: -4.60	Kd: 3.9e-04
+----------------------------------------------------------------------------------------------------
   J:ALA118 <-> P:PHE402
   J:ALA118 <-> P:SER407
   J:ALA119 <-> P:LEU398
@@ -7240,19 +7240,19 @@ J-P	FaxL	PcyA1	39 contacts
   J:TYR348 <-> P:MET411
   J:VAL111 <-> P:TYR399
 
-J-R	FaxL	Acyl carrier protein	1 contacts
---------------------------------------------------------------------------------
+J-R	FAXL	ACYL CARRIER PROTEIN	1 contacts	ΔG: -2.40	Kd: 1.7e-02
+----------------------------------------------------------------------------------------------------
   J:ARG98 <-> R:ASN89
 
-J-S	FaxL	Moc13	4 contacts
---------------------------------------------------------------------------------
+J-S	FAXL	MOC13	4 contacts	ΔG: -3.10	Kd: 4.9e-03
+----------------------------------------------------------------------------------------------------
   J:GLY338 <-> S:ARG80
   J:GLY338 <-> S:TYR81
   J:LYS342 <-> S:ARG80
   J:PHE341 <-> S:ARG80
 
-K-P	Fatty acid desaturase domain-containing protein	PcyA1	30 contacts
---------------------------------------------------------------------------------
+K-P	FATTY ACID DESATURASE DOMAIN-CONTAINING PROTEIN	PCYA1	30 contacts	ΔG: -5.10	Kd: 1.7e-04
+----------------------------------------------------------------------------------------------------
   K:ALA384 <-> P:PRO22
   K:ARG385 <-> P:LEU23
   K:ARG385 <-> P:PRO22
@@ -7284,8 +7284,8 @@ K-P	Fatty acid desaturase domain-containing protein	PcyA1	30 contacts
   K:TYR389 <-> P:PRO25
   K:TYR389 <-> P:SER24
 
-L-M	Moc25	Moc29	77 contacts
---------------------------------------------------------------------------------
+L-M	MOC25	MOC29	77 contacts	ΔG: -9.30	Kd: 1.5e-07
+----------------------------------------------------------------------------------------------------
   L:ALA127 <-> M:PHE144
   L:ALA127 <-> M:TRP140
   L:ALA127 <-> M:TYR149
@@ -7364,13 +7364,13 @@ L-M	Moc25	Moc29	77 contacts
   L:VAL131 <-> M:LEU143
   L:VAL131 <-> M:TRP140
 
-L-P	Moc25	PcyA1	2 contacts
---------------------------------------------------------------------------------
+L-P	MOC25	PCYA1	2 contacts	ΔG: -3.30	Kd: 3.6e-03
+----------------------------------------------------------------------------------------------------
   L:ILE40 <-> P:PHE391
   L:ILE40 <-> P:PHE395
 
-L-R	Moc25	Acyl carrier protein	98 contacts
---------------------------------------------------------------------------------
+L-R	MOC25	ACYL CARRIER PROTEIN	98 contacts	ΔG: -10.60	Kd: 1.6e-08
+----------------------------------------------------------------------------------------------------
   L:ALA178 <-> R:VAL48
   L:ALA68 <-> R:GLU59
   L:ARG180 <-> R:GLU64
@@ -7470,8 +7470,8 @@ L-R	Moc25	Acyl carrier protein	98 contacts
   L:VAL86 <-> R:ASN89
   L:VAL86 <-> R:GLY88
 
-L-S	Moc25	Moc13	21 contacts
---------------------------------------------------------------------------------
+L-S	MOC25	MOC13	21 contacts	ΔG: -4.20	Kd: 8.5e-04
+----------------------------------------------------------------------------------------------------
   L:ALA127 <-> S:ALA69
   L:ARG129 <-> S:GLY75
   L:ARG129 <-> S:MET76
@@ -7494,8 +7494,8 @@ L-S	Moc25	Moc13	21 contacts
   L:VAL122 <-> S:PHE70
   L:VAL122 <-> S:PRO77
 
-M-O	Moc29	Moc45	39 contacts
---------------------------------------------------------------------------------
+M-O	MOC29	MOC45	39 contacts	ΔG: -6.00	Kd: 3.7e-05
+----------------------------------------------------------------------------------------------------
   M:ALA206 <-> O:THR421
   M:ALA209 <-> O:ALA418
   M:ALA209 <-> O:MET422
@@ -7536,8 +7536,8 @@ M-O	Moc29	Moc45	39 contacts
   M:VAL201 <-> O:PHE417
   M:VAL201 <-> O:THR421
 
-M-S	Moc29	Moc13	16 contacts
---------------------------------------------------------------------------------
+M-S	MOC29	MOC13	16 contacts	ΔG: -4.00	Kd: 1.2e-03
+----------------------------------------------------------------------------------------------------
   M:ARG164 <-> S:ASP79
   M:ARG164 <-> S:PRO77
   M:ARG164 <-> S:PRO78
@@ -7555,8 +7555,8 @@ M-S	Moc29	Moc13	16 contacts
   M:TRP172 <-> S:TYR81
   M:VAL176 <-> S:TYR81
 
-O-S	Moc45	Moc13	8 contacts
---------------------------------------------------------------------------------
+O-S	MOC45	MOC13	8 contacts	ΔG: -3.70	Kd: 2.1e-03
+----------------------------------------------------------------------------------------------------
   O:ALA441 <-> S:ARG93
   O:ALA441 <-> S:GLY95
   O:ALA441 <-> S:ILE92
@@ -7566,8 +7566,8 @@ O-S	Moc45	Moc13	8 contacts
   O:ARG440 <-> S:GLY95
   O:ARG440 <-> S:TYR97
 
-S-T	Moc13	Moc31	3 contacts
---------------------------------------------------------------------------------
+S-T	MOC13	MOC31	3 contacts	ΔG: -3.10	Kd: 5.5e-03
+----------------------------------------------------------------------------------------------------
   S:ARG7 <-> T:GLU104
   S:GLU8 <-> T:ARG116
   S:GLU8 <-> T:TRP112

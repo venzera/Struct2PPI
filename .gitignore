@@ -8,3 +8,4 @@ build/
 .eggs/
 *.egg
 .ipynb_checkpoints/
+*_complexes/
