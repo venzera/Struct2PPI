@@ -103,11 +103,10 @@ python ppi_graph_3d_dg.py structure.pdb --output-dir ./results
 The `test/` folder contains example outputs generated from PDB entry 8XKS (20 protein chains, 81 interactions).
 
 ## ΔG Evaluation
-
-
-
-The PRODIGY-based binding energy prediction is intended for **rapid assessment** of protein-protein interaction strengths directly from experimental structures. While PRODIGY provides reliable relative rankings (r=0.96 correlation with FoldX on 8XKS complex), for accurate absolute binding free energy values, consider using more rigorous methods like FoldX, Rosetta or MM/GBSA. Also even little preprocessing of PDB input (repairing missing atoms, relaxation, energy minimization) can improve the quality of binding energy predictions but not always. 
-For example evaluation was performed using FoldX 5.1 on a repaired structure PDB ID 8XKS. As you can see repairing structure using RepairPDB from FoldX didn't improve correlation with FoldX dG values. But PRODIGY itself gives good correlation with FoldX dG values.
+### Binding Energy Prediction
+PRODIGY-based binding energy prediction enables rapid assessment of protein-protein interaction strengths directly from experimental structures. While PRODIGY excels at providing reliable relative rankings between complexes, users seeking accurate absolute binding free energy values should consider more rigorous methods such as FoldX, Rosetta, or MM/GBSA.
+### Validation
+Benchmarking on PDB ID 8XKS demonstrated strong correlation between PRODIGY and FoldX 5.1 ΔG values (r = 0.966). Notably, structure preprocessing with FoldX RepairPDB (repairing missing atoms, energy minimization) did not substantially improve this correlation (r = 0.964), suggesting that PRODIGY performs robustly even on unprocessed experimental structures
 ![Binding Energy Correlation](evaluation/evaluation_8xks.png)
 
 > Delgado J., Reche R., Cianferoni D., Orlando G., van der Kant R., Rousseau F., Schymkowitz J., Serrano L. "FoldX force field revisited, an improved version." *Bioinformatics*, Volume 41, Issue 2, btaf064 (2025). DOI: [10.1093/bioinformatics/btaf064](https://doi.org/10.1093/bioinformatics/btaf064)
