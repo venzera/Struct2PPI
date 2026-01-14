@@ -1,4 +1,4 @@
-# PPI Graph - Protein-Protein Interaction Network Visualizer
+# Struct2PPI - Protein-Protein Interaction Network Visualizer from complexes
 
 Generate interactive protein-protein interaction graphs from PDB/CIF files of Cryo-EM complexes.
 
@@ -101,6 +101,20 @@ python ppi_graph_3d_dg.py structure.pdb --output-dir ./results
 ## Test Data
 
 The `test/` folder contains example outputs generated from PDB entry 8XKS (20 protein chains, 81 interactions).
+
+## ΔG Evaluation
+
+![Binding Energy Correlation](evaluation/evaluation_8xks.png)
+
+The PRODIGY-based binding energy prediction is intended for **rapid assessment** of protein-protein interaction strengths directly from experimental structures. While PRODIGY provides reliable relative rankings (r=0.96 correlation with FoldX on 8XKS complex), for accurate absolute binding free energy values, consider using more rigorous methods:
+
+- **FoldX** - empirical force field for protein stability and binding
+- **Rosetta** - knowledge-based energy function with extensive sampling
+- **MM/GBSA** - molecular mechanics with implicit solvation
+
+**Note:** Preprocessing of PDB input (repairing missing atoms, relaxation, energy minimization) can significantly improve the quality of binding energy predictions. The evaluation above was performed using FoldX 5.1 on a repaired structure.
+
+> Delgado J., Reche R., Cianferoni D., Orlando G., van der Kant R., Rousseau F., Schymkowitz J., Serrano L. "FoldX force field revisited, an improved version." *Bioinformatics*, Volume 41, Issue 2, btaf064 (2025). DOI: [10.1093/bioinformatics/btaf064](https://doi.org/10.1093/bioinformatics/btaf064)
 
 ## References
 

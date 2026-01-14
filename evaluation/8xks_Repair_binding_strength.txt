@@ -1,0 +1,91 @@
+# Chain pairs sorted by binding strength (strongest first)
+# More negative ΔG = stronger binding
+====================================================================================================
+
+Rank  Chain Pair     ΔG (kcal/mol)     Kd (M)         Chain 1                       Chain 2                       
+----------------------------------------------------------------------------------------------------
+1     E-H            -44.40            2.7e-33        Unknown                       Unknown                       
+2     D-G            -42.00            1.7e-31        Unknown                       Unknown                       
+3     E-F            -41.90            1.9e-31        Unknown                       Unknown                       
+4     E-G            -38.70            4.5e-29        Unknown                       Unknown                       
+5     C-E            -38.20            9.5e-29        Unknown                       Unknown                       
+6     A-B            -37.50            3.2e-28        Unknown                       Unknown                       
+7     D-E            -36.40            1.8e-27        Unknown                       Unknown                       
+8     B-E            -26.50            3.5e-20        Unknown                       Unknown                       
+9     E-J            -25.70            1.3e-19        Unknown                       Unknown                       
+10    A-E            -24.80            6.5e-19        Unknown                       Unknown                       
+11    C-D            -24.50            1.1e-18        Unknown                       Unknown                       
+12    E-P            -24.40            1.2e-18        Unknown                       Unknown                       
+13    B-D            -24.00            2.4e-18        Unknown                       Unknown                       
+14    A-F            -22.00            7.0e-17        Unknown                       Unknown                       
+15    E-S            -19.80            3.0e-15        Unknown                       Unknown                       
+16    H-I            -15.00            9.4e-12        Unknown                       Unknown                       
+17    E-M            -13.80            7.8e-11        Unknown                       Unknown                       
+18    C-G            -13.50            1.2e-10        Unknown                       Unknown                       
+19    E-N            -12.60            5.9e-10        Unknown                       Unknown                       
+20    F-J            -12.60            5.4e-10        Unknown                       Unknown                       
+21    F-Q            -12.40            7.7e-10        Unknown                       Unknown                       
+22    J-L            -11.30            5.3e-09        Unknown                       Unknown                       
+23    E-T            -11.10            7.3e-09        Unknown                       Unknown                       
+24    L-R            -11.00            8.2e-09        Unknown                       Unknown                       
+25    E-K            -10.50            2.0e-08        Unknown                       Unknown                       
+26    B-C            -9.20             1.8e-07        Unknown                       Unknown                       
+27    A-C            -8.90             2.8e-07        Unknown                       Unknown                       
+28    E-L            -8.80             3.3e-07        Unknown                       Unknown                       
+29    L-M            -8.80             3.5e-07        Unknown                       Unknown                       
+30    C-T            -8.20             9.2e-07        Unknown                       Unknown                       
+31    A-Q            -8.10             1.1e-06        Unknown                       Unknown                       
+32    D-N            -8.10             1.1e-06        Unknown                       Unknown                       
+33    G-N            -7.80             1.8e-06        Unknown                       Unknown                       
+34    F-S            -7.70             2.3e-06        Unknown                       Unknown                       
+35    J-K            -7.70             2.4e-06        Unknown                       Unknown                       
+36    E-O            -7.50             3.1e-06        Unknown                       Unknown                       
+37    A-T            -6.90             9.2e-06        Unknown                       Unknown                       
+38    F-G            -6.90             8.2e-06        Unknown                       Unknown                       
+39    F-L            -6.90             8.2e-06        Unknown                       Unknown                       
+40    G-H            -6.90             8.7e-06        Unknown                       Unknown                       
+41    E-I            -6.50             1.6e-05        Unknown                       Unknown                       
+42    F-P            -6.50             1.8e-05        Unknown                       Unknown                       
+43    A-S            -6.10             3.4e-05        Unknown                       Unknown                       
+44    B-S            -5.90             4.9e-05        Unknown                       Unknown                       
+45    G-J            -5.70             6.2e-05        Unknown                       Unknown                       
+46    M-O            -5.70             6.2e-05        Unknown                       Unknown                       
+47    B-T            -5.60             7.8e-05        Unknown                       Unknown                       
+48    G-P            -5.10             1.8e-04        Unknown                       Unknown                       
+49    H-O            -5.10             1.8e-04        Unknown                       Unknown                       
+50    C-S            -5.00             2.2e-04        Unknown                       Unknown                       
+51    G-S            -4.80             2.9e-04        Unknown                       Unknown                       
+52    J-M            -4.80             3.0e-04        Unknown                       Unknown                       
+53    G-O            -4.60             4.4e-04        Unknown                       Unknown                       
+54    J-P            -4.60             4.5e-04        Unknown                       Unknown                       
+55    K-P            -4.60             4.1e-04        Unknown                       Unknown                       
+56    D-H            -4.30             7.2e-04        Unknown                       Unknown                       
+57    A-D            -4.20             8.5e-04        Unknown                       Unknown                       
+58    L-S            -4.20             8.7e-04        Unknown                       Unknown                       
+59    M-S            -4.10             9.3e-04        Unknown                       Unknown                       
+60    C-I            -3.90             1.5e-03        Unknown                       Unknown                       
+61    F-R            -3.90             1.3e-03        Unknown                       Unknown                       
+62    A-I            -3.70             1.8e-03        Unknown                       Unknown                       
+63    A-G            -3.60             2.1e-03        Unknown                       Unknown                       
+64    F-I            -3.60             2.2e-03        Unknown                       Unknown                       
+65    D-F            -3.50             2.7e-03        Unknown                       Unknown                       
+66    D-M            -3.50             2.6e-03        Unknown                       Unknown                       
+67    G-M            -3.50             2.9e-03        Unknown                       Unknown                       
+68    I-K            -3.40             3.2e-03        Unknown                       Unknown                       
+69    C-F            -3.30             3.9e-03        Unknown                       Unknown                       
+70    C-O            -3.30             3.7e-03        Unknown                       Unknown                       
+71    F-H            -3.20             4.5e-03        Unknown                       Unknown                       
+72    F-M            -3.20             4.7e-03        Unknown                       Unknown                       
+73    L-P            -3.20             4.3e-03        Unknown                       Unknown                       
+74    O-S            -3.20             4.2e-03        Unknown                       Unknown                       
+75    J-S            -3.10             4.9e-03        Unknown                       Unknown                       
+76    C-H            -2.70             1.0e-02        Unknown                       Unknown                       
+77    H-N            -2.60             1.3e-02        Unknown                       Unknown                       
+78    J-R            -2.50             1.4e-02        Unknown                       Unknown                       
+79    H-M            -2.30             2.0e-02        Unknown                       Unknown                       
+
+====================================================================================================
+
+Total pairs with binding data: 79
+Strongest interaction: E-H (ΔG = -44.40 kcal/mol)
+Weakest interaction: H-M (ΔG = -2.30 kcal/mol)
