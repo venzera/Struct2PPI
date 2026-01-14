@@ -2,6 +2,8 @@
 
 Generate interactive protein-protein interaction graphs from PDB/CIF files of Cryo-EM complexes.
 
+![PPI Graph Example - 8XKS](Scheme.jpg)
+
 ## Features
 
 - Parse PDB and mmCIF structure files
