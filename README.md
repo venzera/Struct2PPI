@@ -1,4 +1,4 @@
-# Struct2PPI - Protein-Protein Interaction Network Visualizer from complexes
+# Struct2PPI - Protein-Protein Interaction Network Visualizer from protein complexes
 
 Generate interactive protein-protein interaction graphs from PDB/CIF files of Cryo-EM complexes.
 
@@ -104,15 +104,11 @@ The `test/` folder contains example outputs generated from PDB entry 8XKS (20 pr
 
 ## ΔG Evaluation
 
+
+
+The PRODIGY-based binding energy prediction is intended for **rapid assessment** of protein-protein interaction strengths directly from experimental structures. While PRODIGY provides reliable relative rankings (r=0.96 correlation with FoldX on 8XKS complex), for accurate absolute binding free energy values, consider using more rigorous methods like FoldX, Rosetta or MM/GBSA. Also even little preprocessing of PDB input (repairing missing atoms, relaxation, energy minimization) can improve the quality of binding energy predictions but not always. 
+For example evaluation was performed using FoldX 5.1 on a repaired structure PDB ID 8XKS. As you can see repairing structure using RepairPDB from FoldX didn't improve correlation with FoldX dG values. But PRODIGY itself gives good correlation with FoldX dG values.
 ![Binding Energy Correlation](evaluation/evaluation_8xks.png)
-
-The PRODIGY-based binding energy prediction is intended for **rapid assessment** of protein-protein interaction strengths directly from experimental structures. While PRODIGY provides reliable relative rankings (r=0.96 correlation with FoldX on 8XKS complex), for accurate absolute binding free energy values, consider using more rigorous methods:
-
-- **FoldX** - empirical force field for protein stability and binding
-- **Rosetta** - knowledge-based energy function with extensive sampling
-- **MM/GBSA** - molecular mechanics with implicit solvation
-
-**Note:** Preprocessing of PDB input (repairing missing atoms, relaxation, energy minimization) can significantly improve the quality of binding energy predictions. The evaluation above was performed using FoldX 5.1 on a repaired structure.
 
 > Delgado J., Reche R., Cianferoni D., Orlando G., van der Kant R., Rousseau F., Schymkowitz J., Serrano L. "FoldX force field revisited, an improved version." *Bioinformatics*, Volume 41, Issue 2, btaf064 (2025). DOI: [10.1093/bioinformatics/btaf064](https://doi.org/10.1093/bioinformatics/btaf064)
 
