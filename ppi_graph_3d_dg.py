@@ -15,6 +15,7 @@ import argparse
 import os
 import subprocess
 import re
+import shutil
 import warnings
 import io
 from collections import defaultdict
@@ -268,6 +269,226 @@ def calculate_binding_energies(structure, interactions, complexes_dir):
             print("Failed")
 
     return binding_data
+
+
+def run_foldx_repair(fx_path, pdb_path, work_dir):
+    """Run FoldX RepairPDB command."""
+    pdb_name = os.path.basename(pdb_path)
+    shutil.copy(pdb_path, os.path.join(work_dir, pdb_name))
+
+    cmd = [fx_path, '--command=RepairPDB', f'--pdb={pdb_name}']
+    print(f"Running FoldX RepairPDB on {pdb_name}...")
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=work_dir, timeout=3600)
+
+    basename = os.path.splitext(pdb_name)[0]
+    repaired = os.path.join(work_dir, f"{basename}_Repair.pdb")
+
+    if os.path.exists(repaired):
+        print(f"  Repaired structure: {repaired}")
+        return repaired
+    else:
+        print(f"  Error: RepairPDB failed")
+        if result.stderr:
+            print(f"  {result.stderr[:500]}")
+        return None
+
+
+def fake_foldx_repair(pdb_path, work_dir):
+    """Fake FoldX repair by copying with _Repair.pdb suffix."""
+    basename = os.path.splitext(os.path.basename(pdb_path))[0]
+    repaired = os.path.join(work_dir, f"{basename}_Repair.pdb")
+    shutil.copy(pdb_path, repaired)
+    print(f"Faked repair: {repaired}")
+    return repaired
+
+
+def parse_foldx_interaction(fxout_path):
+    """Parse interaction energy from FoldX AnalyseComplex output."""
+    with open(fxout_path, 'r') as f:
+        header_found = False
+        for line in f:
+            if line.strip().startswith('Pdb'):
+                header_found = True
+                continue
+            if header_found:
+                parts = line.strip().split('\t')
+                if len(parts) >= 6:
+                    try:
+                        return float(parts[5])
+                    except ValueError:
+                        continue
+    return None
+
+
+def run_foldx_analyse_complex(fx_path, pdb_path, chain1, chain2, work_dir):
+    """Run FoldX AnalyseComplex and return interaction energy."""
+    pdb_name = os.path.basename(pdb_path)
+    work_pdb = os.path.join(work_dir, pdb_name)
+    if not os.path.exists(work_pdb):
+        shutil.copy(pdb_path, work_pdb)
+
+    cmd = [fx_path, '--command=AnalyseComplex', f'--pdb={pdb_name}',
+           f'--analyseComplexChains={chain1},{chain2}']
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=work_dir, timeout=600)
+
+    basename = os.path.splitext(pdb_name)[0]
+    fxout = os.path.join(work_dir, f"Interaction_{basename}_{chain1}{chain2}.fxout")
+
+    if os.path.exists(fxout):
+        return parse_foldx_interaction(fxout)
+
+    print(f"  Warning: No FoldX output for {chain1}-{chain2}")
+    return None
+
+
+def calculate_foldx_scores(fx_path, repaired_pdb, interactions, work_dir):
+    """Run FoldX AnalyseComplex for all interacting pairs."""
+    foldx_data = {}
+    total = len(interactions)
+    print(f"\nCalculating FoldX interaction energies for {total} pairs...")
+
+    for i, (chain1, chain2) in enumerate(interactions.keys()):
+        print(f"  [{i+1}/{total}] AnalyseComplex {chain1}-{chain2}...", end=" ")
+        energy = run_foldx_analyse_complex(fx_path, repaired_pdb, chain1, chain2, work_dir)
+        foldx_data[(chain1, chain2)] = energy
+        if energy is not None:
+            print(f"IE = {energy:.2f} kcal/mol")
+        else:
+            print("Failed")
+
+    return foldx_data
+
+
+def run_foldx_buildmodel(fx_path, pdb_path, mutant_file, work_dir):
+    """Run FoldX BuildModel with mutations."""
+    pdb_name = os.path.basename(pdb_path)
+    work_pdb = os.path.join(work_dir, pdb_name)
+    if not os.path.exists(work_pdb):
+        shutil.copy(pdb_path, work_pdb)
+
+    shutil.copy(mutant_file, os.path.join(work_dir, 'individual_list.txt'))
+
+    cmd = [fx_path, '--command=BuildModel', f'--pdb={pdb_name}',
+           '--mutant-file=individual_list.txt']
+    print(f"Running FoldX BuildModel...")
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=work_dir, timeout=3600)
+
+    basename = os.path.splitext(pdb_name)[0]
+    wt_pdb = os.path.join(work_dir, f"WT_{basename}_1.pdb")
+    mut_pdb = os.path.join(work_dir, f"{basename}_1.pdb")
+    dif_file = os.path.join(work_dir, f"Dif_{basename}.fxout")
+
+    if os.path.exists(wt_pdb) and os.path.exists(mut_pdb):
+        print(f"  WT structure: {wt_pdb}")
+        print(f"  Mutant structure: {mut_pdb}")
+
+        total_ddg = None
+        if os.path.exists(dif_file):
+            with open(dif_file, 'r') as f:
+                for line in f:
+                    if line.startswith('Pdb'):
+                        continue
+                    parts = line.strip().split('\t')
+                    if len(parts) >= 2:
+                        try:
+                            total_ddg = float(parts[1])
+                        except ValueError:
+                            pass
+
+        return wt_pdb, mut_pdb, total_ddg
+    else:
+        print(f"  Error: BuildModel failed")
+        if result.stderr:
+            print(f"  {result.stderr[:500]}")
+        return None, None, None
+
+
+def calculate_foldx_ddg(fx_path, wt_pdb, mut_pdb, interactions, work_dir):
+    """Calculate binding ddG by running AnalyseComplex on WT and mutant."""
+    ddg_data = {}
+    total = len(interactions)
+
+    wt_dir = os.path.join(work_dir, 'wt')
+    mut_dir = os.path.join(work_dir, 'mut')
+    os.makedirs(wt_dir, exist_ok=True)
+    os.makedirs(mut_dir, exist_ok=True)
+
+    print(f"\nCalculating binding ddG for {total} pairs...")
+
+    for i, (chain1, chain2) in enumerate(interactions.keys()):
+        print(f"  [{i+1}/{total}] {chain1}-{chain2}...", end=" ")
+
+        wt_energy = run_foldx_analyse_complex(fx_path, wt_pdb, chain1, chain2, wt_dir)
+        mut_energy = run_foldx_analyse_complex(fx_path, mut_pdb, chain1, chain2, mut_dir)
+
+        if wt_energy is not None and mut_energy is not None:
+            ddg = mut_energy - wt_energy
+            ddg_data[(chain1, chain2)] = {
+                'wt_energy': wt_energy,
+                'mut_energy': mut_energy,
+                'ddG': ddg
+            }
+            print(f"ddG = {ddg:.2f} (WT: {wt_energy:.2f}, Mut: {mut_energy:.2f})")
+        else:
+            ddg_data[(chain1, chain2)] = {
+                'wt_energy': wt_energy,
+                'mut_energy': mut_energy,
+                'ddG': None
+            }
+            print("Failed")
+
+    return ddg_data
+
+
+def run_prodigy_one_vs_all(pdb_path, chain_id, other_chain_ids):
+    """Run PRODIGY for one chain vs all others combined."""
+    others_str = ','.join(sorted(other_chain_ids))
+    try:
+        cmd = ['prodigy', pdb_path, '--selection', chain_id, others_str]
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=300)
+        output = result.stdout + result.stderr
+
+        dg_match = re.search(r'Predicted binding affinity.*?:\s*([-\d.]+)', output)
+        kd_match = re.search(r'Predicted dissociation constant.*?:\s*([\d.eE+-]+)', output)
+
+        dg = float(dg_match.group(1)) if dg_match else None
+        kd = kd_match.group(1) if kd_match else None
+
+        return dg, kd
+    except subprocess.TimeoutExpired:
+        print(f"  Warning: PRODIGY timeout for {chain_id} vs all")
+        return None, None
+    except FileNotFoundError:
+        print("  Error: PRODIGY not found. Install with: pip install prodigy-prot")
+        return None, None
+    except Exception as e:
+        print(f"  Warning: PRODIGY error for {chain_id} vs all: {e}")
+        return None, None
+
+
+def calculate_one_vs_all(pdb_path, protein_chain_ids):
+    """Calculate PRODIGY one-vs-all for each chain."""
+    chain_list = sorted(protein_chain_ids)
+    results = {}
+    total = len(chain_list)
+    print(f"\nCalculating one-vs-all binding energies for {total} chains...")
+
+    for i, chain_id in enumerate(chain_list):
+        other_chains = [c for c in chain_list if c != chain_id]
+        if not other_chains:
+            continue
+        others_str = ','.join(other_chains)
+        print(f"  [{i+1}/{total}] {chain_id} vs {others_str}...", end=" ")
+
+        dg, kd = run_prodigy_one_vs_all(pdb_path, chain_id, other_chains)
+        results[chain_id] = {'dG': dg, 'Kd': kd, 'vs': others_str}
+
+        if dg is not None:
+            print(f"ΔG = {dg:.1f} kcal/mol")
+        else:
+            print("Failed")
+
+    return results
 
 
 def get_chain_pdb_string(structure, chain_id):
@@ -866,6 +1087,73 @@ def save_binding_strength_ranking(binding_data, chain_labels, output_file):
     print(f"Saved binding strength ranking: {output_file}")
 
 
+def save_foldx_ranking(foldx_data, chain_labels, output_file):
+    """Save FoldX interaction energy ranking."""
+    valid = [(k, v) for k, v in foldx_data.items() if v is not None]
+    sorted_pairs = sorted(valid, key=lambda x: x[1])
+
+    with open(output_file, 'w') as f:
+        f.write("# FoldX Interaction Energies (AnalyseComplex)\n")
+        f.write("# More negative = stronger binding\n")
+        f.write("=" * 90 + "\n\n")
+        f.write(f"{'Rank':<6}{'Chain Pair':<15}{'IE (kcal/mol)':<18}{'Chain 1':<30}{'Chain 2':<30}\n")
+        f.write("-" * 90 + "\n")
+
+        for rank, ((c1, c2), energy) in enumerate(sorted_pairs, 1):
+            l1 = chain_labels.get(c1, "Unknown")[:28]
+            l2 = chain_labels.get(c2, "Unknown")[:28]
+            f.write(f"{rank:<6}{c1}-{c2:<13}{energy:<18.2f}{l1:<30}{l2:<30}\n")
+
+        f.write(f"\nTotal pairs: {len(sorted_pairs)}\n")
+
+    print(f"Saved FoldX ranking: {output_file}")
+
+
+def save_foldx_ddg_ranking(ddg_data, chain_labels, output_file):
+    """Save FoldX ddG (mutation effect on binding) ranking."""
+    valid = [(k, v) for k, v in ddg_data.items() if v.get('ddG') is not None]
+    sorted_pairs = sorted(valid, key=lambda x: x[1]['ddG'])
+
+    with open(output_file, 'w') as f:
+        f.write("# FoldX Binding ddG (BuildModel + AnalyseComplex)\n")
+        f.write("# Negative ddG = mutation stabilizes binding\n")
+        f.write("# Positive ddG = mutation destabilizes binding\n")
+        f.write("=" * 120 + "\n\n")
+        f.write(f"{'Rank':<6}{'Pair':<12}{'ddG':<12}{'WT IE':<14}{'Mut IE':<14}{'Chain 1':<25}{'Chain 2':<25}\n")
+        f.write("-" * 120 + "\n")
+
+        for rank, ((c1, c2), data) in enumerate(sorted_pairs, 1):
+            l1 = chain_labels.get(c1, "Unknown")[:23]
+            l2 = chain_labels.get(c2, "Unknown")[:23]
+            f.write(f"{rank:<6}{c1}-{c2:<10}{data['ddG']:<12.2f}{data['wt_energy']:<14.2f}{data['mut_energy']:<14.2f}{l1:<25}{l2:<25}\n")
+
+        f.write(f"\nTotal pairs: {len(sorted_pairs)}\n")
+
+    print(f"Saved FoldX ddG ranking: {output_file}")
+
+
+def save_one_vs_all_ranking(ova_data, chain_labels, output_file):
+    """Save one-vs-all PRODIGY ranking."""
+    valid = [(k, v) for k, v in ova_data.items() if v.get('dG') is not None]
+    sorted_chains = sorted(valid, key=lambda x: x[1]['dG'])
+
+    with open(output_file, 'w') as f:
+        f.write("# PRODIGY One-vs-All Binding Energies\n")
+        f.write("# Each chain scored against all other chains combined\n")
+        f.write("=" * 90 + "\n\n")
+        f.write(f"{'Rank':<6}{'Chain':<10}{'ΔG (kcal/mol)':<18}{'Kd (M)':<18}{'Description':<35}\n")
+        f.write("-" * 90 + "\n")
+
+        for rank, (chain_id, data) in enumerate(sorted_chains, 1):
+            label = chain_labels.get(chain_id, "Unknown")[:33]
+            kd = data.get('Kd', 'N/A')
+            f.write(f"{rank:<6}{chain_id:<10}{data['dG']:<18.2f}{kd:<18}{label:<35}\n")
+
+        f.write(f"\nTotal chains: {len(sorted_chains)}\n")
+
+    print(f"Saved one-vs-all ranking: {output_file}")
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Generate PPI graph with 3D structure nodes and binding energy (PRODIGY)',
@@ -874,6 +1162,9 @@ def main():
 Examples:
     python ppi_graph_3d_dg.py structure.pdb
     python ppi_graph_3d_dg.py structure.pdb --cutoff 4.0
+    python ppi_graph_3d_dg.py structure.pdb --fx_score --fx_path /path/to/foldx
+    python ppi_graph_3d_dg.py structure.pdb --fx_mut mutations.txt --fx_path /path/to/foldx
+    python ppi_graph_3d_dg.py structure.pdb --one_vs_all
         """
     )
 
@@ -884,6 +1175,14 @@ Examples:
                         help='Output directory (default: current directory)')
     parser.add_argument('--skip-prodigy', action='store_true',
                         help='Skip PRODIGY calculation (for testing)')
+    parser.add_argument('--fx_score', action='store_true',
+                        help='Run FoldX RepairPDB + AnalyseComplex to score chain interactions')
+    parser.add_argument('--fx_path', type=str, default=None,
+                        help='Path to FoldX executable')
+    parser.add_argument('--fx_mut', type=str, default=None,
+                        help='Path to individual_list.txt for FoldX BuildModel (skips repair, calculates binding ddG)')
+    parser.add_argument('--one_vs_all', action='store_true',
+                        help='Calculate PRODIGY binding energy for each chain vs all others combined')
 
     args = parser.parse_args()
 
@@ -894,6 +1193,14 @@ Examples:
     ext = os.path.splitext(args.input_file)[1].lower()
     if ext != '.pdb':
         print(f"Error: Only PDB files are supported. Got: {ext}")
+        return 1
+
+    if (args.fx_score or args.fx_mut) and not args.fx_path:
+        print("Error: --fx_path is required when using --fx_score or --fx_mut")
+        return 1
+
+    if args.fx_mut and not os.path.exists(args.fx_mut):
+        print(f"Error: Mutation file not found: {args.fx_mut}")
         return 1
 
     os.makedirs(args.output_dir, exist_ok=True)
@@ -940,6 +1247,31 @@ Examples:
     elif args.skip_prodigy:
         print("\nSkipping PRODIGY calculations (--skip-prodigy flag)")
 
+    # FoldX scoring
+    foldx_data = {}
+    foldx_ddg_data = {}
+    foldx_dir = os.path.join(args.output_dir, f"{basename}_foldx")
+
+    if args.fx_score and interactions:
+        os.makedirs(foldx_dir, exist_ok=True)
+        repaired_pdb = run_foldx_repair(args.fx_path, args.input_file, foldx_dir)
+        if repaired_pdb:
+            foldx_data = calculate_foldx_scores(args.fx_path, repaired_pdb, interactions, foldx_dir)
+
+    if args.fx_mut and interactions:
+        os.makedirs(foldx_dir, exist_ok=True)
+        repaired_pdb = fake_foldx_repair(args.input_file, foldx_dir)
+        wt_pdb, mut_pdb, total_ddg = run_foldx_buildmodel(args.fx_path, repaired_pdb, args.fx_mut, foldx_dir)
+        if total_ddg is not None:
+            print(f"  Total stability ddG: {total_ddg:.2f} kcal/mol")
+        if wt_pdb and mut_pdb:
+            foldx_ddg_data = calculate_foldx_ddg(args.fx_path, wt_pdb, mut_pdb, interactions, foldx_dir)
+
+    # One-vs-all PRODIGY
+    ova_data = {}
+    if args.one_vs_all:
+        ova_data = calculate_one_vs_all(args.input_file, protein_chain_ids)
+
     print("\nBuilding interaction graph...")
     G = build_graph(chain_labels, interactions, protein_chain_ids, binding_data)
 
@@ -957,12 +1289,30 @@ Examples:
     if binding_data:
         save_binding_strength_ranking(binding_data, chain_labels, binding_file)
 
+    if foldx_data:
+        foldx_file = os.path.join(args.output_dir, f"{basename}_foldx_scores.txt")
+        save_foldx_ranking(foldx_data, chain_labels, foldx_file)
+
+    if foldx_ddg_data:
+        ddg_file = os.path.join(args.output_dir, f"{basename}_foldx_ddg.txt")
+        save_foldx_ddg_ranking(foldx_ddg_data, chain_labels, ddg_file)
+
+    if ova_data:
+        ova_file = os.path.join(args.output_dir, f"{basename}_one_vs_all.txt")
+        save_one_vs_all_ranking(ova_data, chain_labels, ova_file)
+
     print("\nDone!")
     print(f"\nSummary:")
     print(f"  Protein chains: {len(protein_chain_ids)}")
     print(f"  Interacting pairs: {len(interactions)}")
     print(f"  Total contacts: {sum(interactions.values())}")
     print(f"  Pairs with binding data: {len([v for v in binding_data.values() if v.get('dG') is not None])}")
+    if foldx_data:
+        print(f"  FoldX scored pairs: {len([v for v in foldx_data.values() if v is not None])}")
+    if foldx_ddg_data:
+        print(f"  FoldX ddG pairs: {len([v for v in foldx_ddg_data.values() if v.get('ddG') is not None])}")
+    if ova_data:
+        print(f"  One-vs-all chains: {len([v for v in ova_data.values() if v.get('dG') is not None])}")
     print(f"\nOutput files:")
     print(f"  HTML visualization: {html_file}")
     print(f"  Chain info: {chain_info_file}")
@@ -970,6 +1320,12 @@ Examples:
     if binding_data:
         print(f"  Binding strength: {binding_file}")
         print(f"  Complex PDBs: {complexes_dir}/")
+    if foldx_data:
+        print(f"  FoldX scores: {os.path.join(args.output_dir, f'{basename}_foldx_scores.txt')}")
+    if foldx_ddg_data:
+        print(f"  FoldX ddG: {os.path.join(args.output_dir, f'{basename}_foldx_ddg.txt')}")
+    if ova_data:
+        print(f"  One-vs-all: {os.path.join(args.output_dir, f'{basename}_one_vs_all.txt')}")
 
     return 0
 
