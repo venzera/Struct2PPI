@@ -72,6 +72,10 @@ python ppi_graph_3d_dg.py structure.pdb --one_vs_all
 | `--fx_mut` | Path to `individual_list.txt` with mutations for FoldX BuildModel. Skips repair (copies input with `_Repair.pdb` suffix), runs BuildModel, then AnalyseComplex on both WT and mutant structures to calculate binding ΔΔG per chain pair |
 | `--one_vs_all` | For each chain, combine all other chains as a single partner and calculate binding energy via PRODIGY (`--selection A B,C,D,...`) |
 
+#### Why one-vs-all mode?
+
+According to Kastritis & Bonvin (*J Mol Biol* 2014), PRODIGY's scoring function explicitly depends on the non-interacting surface (NIS) — polar and charged residues on the solvent-exposed surface outside the interface contribute to ΔG through hydration shell stability and long-range electrostatics. I assumed that in a multi-chain complex, the NIS composition changes when additional partners are bound (some surfaces get buried), so simply summing pairwise ΔG values would use wrong NIS contexts for each pair. The one-vs-all mode lets PRODIGY see the actual NIS of the full assembly, which should give a more realistic estimate.
+
 ## Output Files
 
 For input `structure.pdb` (or `.cif` for ppi_graph.py/ppi_graph_3d.py):
