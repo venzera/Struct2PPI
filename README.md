@@ -179,6 +179,22 @@ Sum of one-vs-all ΔG = **-120.80 kcal/mol** (9 chains, average -13.42 kcal/mol 
 
 The one-vs-all ranking reveals which chains are most embedded in the complex: chain B (ΔG = -18.10) has the strongest total binding contribution, while chain D (ΔG = -9.20) is most peripheral. This information is not directly extractable from pairwise scoring, where individual pair values lack the NIS context of the full assembly.
 
+**Σ pairwise ΔG per chain vs one-vs-all ΔG:**
+
+| Rank | Chain | Σ pairwise ΔG | # pairs | One-vs-all ΔG | Δ |
+|------|-------|---------------|---------|---------------|-------|
+| 1 | B | -39.7 | 6 | -18.1 | +21.6 |
+| 2 | H | -33.5 | 5 | -16.6 | +16.9 |
+| 3 | E | -31.3 | 5 | -14.3 | +17.0 |
+| 4 | A | -26.9 | 4 | -14.7 | +12.2 |
+| 5 | F | -26.0 | 4 | -13.6 | +12.4 |
+| 6 | C | -24.1 | 4 | -11.6 | +12.5 |
+| 7 | G | -23.3 | 4 | -10.7 | +12.6 |
+| 8 | I | -20.3 | 3 | -12.0 | +8.3 |
+| 9 | D | -17.3 | 3 | -9.2 | +8.1 |
+
+The relative ranking is preserved — chains B, H, E remain the most connected, D remains the most peripheral — but the absolute values diverge substantially. Summing pairwise ΔG overestimates binding by +8 to +22 kcal/mol per chain. The discrepancy scales with the number of interaction partners: chain B (6 pairs, Δ = +21.6) vs chain D (3 pairs, Δ = +8.1). This is consistent with pairwise scoring using incorrect NIS contexts — each isolated pair calculation assumes the remaining surface is fully solvent-exposed, when in reality other partners bury parts of it.
+
 ## ΔG Evaluation
 ### Binding Energy Prediction
 PRODIGY-based binding energy prediction enables rapid assessment of protein-protein interaction strengths directly from experimental structures. While PRODIGY excels at providing reliable relative rankings between complexes, users seeking accurate absolute binding free energy values should consider more rigorous methods such as FoldX, Rosetta, or MM/GBSA.
