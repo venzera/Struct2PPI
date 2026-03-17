@@ -302,8 +302,12 @@ def fake_foldx_repair(pdb_path, work_dir):
     return repaired
 
 
-def parse_foldx_interaction(fxout_path):
-    """Parse interaction energy from FoldX AnalyseComplex output."""
+def parse_foldx_interactions(fxout_path):
+    """Parse ALL interaction energies from FoldX AnalyseComplex output.
+
+    Returns dict of (chain1, chain2) -> interaction_energy.
+    """
+    results = {}
     with open(fxout_path, 'r') as f:
         header_found = False
         for line in f:
@@ -314,48 +318,57 @@ def parse_foldx_interaction(fxout_path):
                 parts = line.strip().split('\t')
                 if len(parts) >= 6:
                     try:
-                        return float(parts[5])
-                    except ValueError:
+                        chain1 = parts[1]
+                        chain2 = parts[2]
+                        energy = float(parts[5])
+                        pair = tuple(sorted([chain1, chain2]))
+                        results[pair] = energy
+                    except (ValueError, IndexError):
                         continue
-    return None
+    return results
 
 
-def run_foldx_analyse_complex(fx_path, pdb_path, chain1, chain2, work_dir):
-    """Run FoldX AnalyseComplex and return interaction energy."""
+def run_foldx_analyse_complex(fx_path, pdb_path, work_dir):
+    """Run FoldX AnalyseComplex on full structure (all chain pairs at once)."""
     pdb_name = os.path.basename(pdb_path)
     work_pdb = os.path.join(work_dir, pdb_name)
     if not os.path.exists(work_pdb):
         shutil.copy(pdb_path, work_pdb)
 
-    cmd = [fx_path, '--command=AnalyseComplex', f'--pdb={pdb_name}',
-           f'--analyseComplexChains={chain1},{chain2}']
-    result = subprocess.run(cmd, capture_output=True, text=True, cwd=work_dir, timeout=600)
+    cmd = [fx_path, '--command=AnalyseComplex', f'--pdb={pdb_name}']
+    print(f"Running FoldX AnalyseComplex on {pdb_name}...")
+    result = subprocess.run(cmd, capture_output=True, text=True, cwd=work_dir, timeout=3600)
 
+    # Find the Interaction output file (named Interaction_{basename}_*.fxout)
     basename = os.path.splitext(pdb_name)[0]
-    fxout = os.path.join(work_dir, f"Interaction_{basename}_{chain1}{chain2}.fxout")
+    import glob
+    fxout_files = glob.glob(os.path.join(work_dir, f"Interaction_{basename}*.fxout"))
 
-    if os.path.exists(fxout):
-        return parse_foldx_interaction(fxout)
+    if fxout_files:
+        fxout = fxout_files[0]
+        return parse_foldx_interactions(fxout)
 
-    print(f"  Warning: No FoldX output for {chain1}-{chain2}")
-    return None
+    print(f"  Warning: No FoldX AnalyseComplex output found")
+    if result.stderr:
+        print(f"  {result.stderr[:500]}")
+    return {}
 
 
 def calculate_foldx_scores(fx_path, repaired_pdb, interactions, work_dir):
-    """Run FoldX AnalyseComplex for all interacting pairs."""
+    """Run FoldX AnalyseComplex once and extract energies for interacting pairs."""
+    all_energies = run_foldx_analyse_complex(fx_path, repaired_pdb, work_dir)
+
     foldx_data = {}
-    total = len(interactions)
-    print(f"\nCalculating FoldX interaction energies for {total} pairs...")
-
-    for i, (chain1, chain2) in enumerate(interactions.keys()):
-        print(f"  [{i+1}/{total}] AnalyseComplex {chain1}-{chain2}...", end=" ")
-        energy = run_foldx_analyse_complex(fx_path, repaired_pdb, chain1, chain2, work_dir)
-        foldx_data[(chain1, chain2)] = energy
+    for (chain1, chain2) in interactions.keys():
+        pair = tuple(sorted([chain1, chain2]))
+        energy = all_energies.get(pair)
+        foldx_data[pair] = energy
         if energy is not None:
-            print(f"IE = {energy:.2f} kcal/mol")
+            print(f"  {chain1}-{chain2}: IE = {energy:.2f} kcal/mol")
         else:
-            print("Failed")
+            print(f"  {chain1}-{chain2}: No FoldX data")
 
+    print(f"\n  Scored {len([v for v in foldx_data.values() if v is not None])}/{len(interactions)} pairs")
     return foldx_data
 
 
@@ -405,37 +418,39 @@ def run_foldx_buildmodel(fx_path, pdb_path, mutant_file, work_dir):
 
 def calculate_foldx_ddg(fx_path, wt_pdb, mut_pdb, interactions, work_dir):
     """Calculate binding ddG by running AnalyseComplex on WT and mutant."""
-    ddg_data = {}
-    total = len(interactions)
-
     wt_dir = os.path.join(work_dir, 'wt')
     mut_dir = os.path.join(work_dir, 'mut')
     os.makedirs(wt_dir, exist_ok=True)
     os.makedirs(mut_dir, exist_ok=True)
 
-    print(f"\nCalculating binding ddG for {total} pairs...")
+    print("\nRunning AnalyseComplex on WT structure...")
+    wt_energies = run_foldx_analyse_complex(fx_path, wt_pdb, wt_dir)
+    print("Running AnalyseComplex on mutant structure...")
+    mut_energies = run_foldx_analyse_complex(fx_path, mut_pdb, mut_dir)
 
-    for i, (chain1, chain2) in enumerate(interactions.keys()):
-        print(f"  [{i+1}/{total}] {chain1}-{chain2}...", end=" ")
+    ddg_data = {}
+    print(f"\nCalculating binding ddG for {len(interactions)} pairs...")
 
-        wt_energy = run_foldx_analyse_complex(fx_path, wt_pdb, chain1, chain2, wt_dir)
-        mut_energy = run_foldx_analyse_complex(fx_path, mut_pdb, chain1, chain2, mut_dir)
+    for (chain1, chain2) in interactions.keys():
+        pair = tuple(sorted([chain1, chain2]))
+        wt_energy = wt_energies.get(pair)
+        mut_energy = mut_energies.get(pair)
 
         if wt_energy is not None and mut_energy is not None:
             ddg = mut_energy - wt_energy
-            ddg_data[(chain1, chain2)] = {
+            ddg_data[pair] = {
                 'wt_energy': wt_energy,
                 'mut_energy': mut_energy,
                 'ddG': ddg
             }
-            print(f"ddG = {ddg:.2f} (WT: {wt_energy:.2f}, Mut: {mut_energy:.2f})")
+            print(f"  {chain1}-{chain2}: ddG = {ddg:.2f} (WT: {wt_energy:.2f}, Mut: {mut_energy:.2f})")
         else:
-            ddg_data[(chain1, chain2)] = {
+            ddg_data[pair] = {
                 'wt_energy': wt_energy,
                 'mut_energy': mut_energy,
                 'ddG': None
             }
-            print("Failed")
+            print(f"  {chain1}-{chain2}: Failed")
 
     return ddg_data
 
