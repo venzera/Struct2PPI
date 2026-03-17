@@ -143,6 +143,42 @@ python ppi_graph_3d_dg.py 8xks.pdb --one_vs_all --skip-prodigy
 
 The `test/` folder contains example outputs generated from PDB entry 8XKS (20 protein chains, 81 interactions).
 
+### 5L08 — Pairwise vs One-vs-All (Caspase-8 homononamer)
+
+PDB ID [5L08](https://www.rcsb.org/structure/5L08) is a Caspase-8 complex with 9 identical chains (A–I, 19 interacting pairs).
+
+**Pairwise PRODIGY** (default mode — each chain pair scored independently):
+
+| Rank | Pair | ΔG (kcal/mol) | Kd (M) |
+|------|------|---------------|--------|
+| 1 | B-I | -8.90 | 3.1e-07 |
+| 2 | A-H | -8.10 | 1.2e-06 |
+| 3 | F-H | -8.10 | 1.1e-06 |
+| 4 | E-G | -7.60 | 2.6e-06 |
+| 5 | B-E | -7.50 | 3.0e-06 |
+| ... | ... | ... | ... |
+| 19 | F-G | -4.80 | 2.9e-04 |
+
+Sum of all pairwise ΔG = **-119.60 kcal/mol** (19 pairs, average -6.29 kcal/mol per pair).
+
+**One-vs-all PRODIGY** (`--one_vs_all` — each chain vs all others combined):
+
+| Rank | Chain | ΔG (kcal/mol) | Kd (M) |
+|------|-------|---------------|--------|
+| 1 | B | -18.10 | 4.9e-14 |
+| 2 | H | -16.60 | 6.3e-13 |
+| 3 | A | -14.70 | 1.7e-11 |
+| 4 | E | -14.30 | 3.1e-11 |
+| 5 | F | -13.60 | 1.1e-10 |
+| 6 | I | -12.00 | 1.6e-09 |
+| 7 | C | -11.60 | 2.9e-09 |
+| 8 | G | -10.70 | 1.3e-08 |
+| 9 | D | -9.20 | 1.7e-07 |
+
+Sum of one-vs-all ΔG = **-120.80 kcal/mol** (9 chains, average -13.42 kcal/mol per chain).
+
+The one-vs-all ranking reveals which chains are most embedded in the complex: chain B (ΔG = -18.10) has the strongest total binding contribution, while chain D (ΔG = -9.20) is most peripheral. This information is not directly extractable from pairwise scoring, where individual pair values lack the NIS context of the full assembly.
+
 ## ΔG Evaluation
 ### Binding Energy Prediction
 PRODIGY-based binding energy prediction enables rapid assessment of protein-protein interaction strengths directly from experimental structures. While PRODIGY excels at providing reliable relative rankings between complexes, users seeking accurate absolute binding free energy values should consider more rigorous methods such as FoldX, Rosetta, or MM/GBSA.
