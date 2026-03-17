@@ -34,8 +34,8 @@ python ppi_graph_3d.py structure.cif
 python ppi_graph_3d.py structure.pdb --cutoff 4.0
 ```
 
-### `ppi_graph_3d_dg.py` - 3D Structures with Binding Energy (PRODIGY)
-Network graph with 3D protein structures and binding energy (ΔG) calculated using PRODIGY for each interacting chain pair. **PDB files only.**
+### `ppi_graph_3d_dg.py` - 3D Structures with Binding Energy (PRODIGY + FoldX)
+Network graph with 3D protein structures and binding energy (ΔG) calculated using PRODIGY for each interacting chain pair. Supports FoldX integration for force-field-based scoring and mutation analysis. **PDB files only.**
 
 Features:
 - Calculates binding affinity (ΔG in kcal/mol) for each chain pair using PRODIGY
@@ -43,12 +43,34 @@ Features:
 - Legend sorted by binding strength (strongest interactions first)
 - Creates separate PDB files for each interacting chain pair
 - Outputs binding strength ranking file
+- FoldX RepairPDB + AnalyseComplex scoring (`--fx_score`)
+- FoldX BuildModel mutation ΔΔG analysis (`--fx_mut`)
+- One-vs-all PRODIGY mode: each chain vs all others combined (`--one_vs_all`)
 
 ```bash
+# PRODIGY binding energy
 python ppi_graph_3d_dg.py structure.pdb
 python ppi_graph_3d_dg.py structure.pdb --cutoff 4.0
 python ppi_graph_3d_dg.py structure.pdb --skip-prodigy  # Skip PRODIGY (for testing)
+
+# FoldX scoring (RepairPDB + AnalyseComplex)
+python ppi_graph_3d_dg.py structure.pdb --fx_score --fx_path /path/to/foldx
+
+# FoldX mutation ddG (BuildModel, skips repair)
+python ppi_graph_3d_dg.py structure.pdb --fx_mut individual_list.txt --fx_path /path/to/foldx
+
+# One-vs-all: each chain vs all others combined (PRODIGY)
+python ppi_graph_3d_dg.py structure.pdb --one_vs_all
 ```
+
+#### Flags
+
+| Flag | Description |
+|------|-------------|
+| `--fx_score` | Run FoldX RepairPDB on the input structure, then AnalyseComplex to score interaction energies for each chain pair |
+| `--fx_path` | Path to the FoldX executable (required with `--fx_score` or `--fx_mut`) |
+| `--fx_mut` | Path to `individual_list.txt` with mutations for FoldX BuildModel. Skips repair (copies input with `_Repair.pdb` suffix), runs BuildModel, then AnalyseComplex on both WT and mutant structures to calculate binding ΔΔG per chain pair |
+| `--one_vs_all` | For each chain, combine all other chains as a single partner and calculate binding energy via PRODIGY (`--selection A B,C,D,...`) |
 
 ## Output Files
 
@@ -60,6 +82,10 @@ For input `structure.pdb` (or `.cif` for ppi_graph.py/ppi_graph_3d.py):
 - `structure_residue_contacts.txt` - All interacting residue pairs (with ΔG for ppi_graph_3d_dg.py)
 - `structure_binding_strength.txt` - Chain pairs sorted by binding strength (ppi_graph_3d_dg.py)
 - `structure_complexes/` - PDB files for each chain pair (ppi_graph_3d_dg.py)
+- `structure_foldx_scores.txt` - FoldX interaction energy ranking (`--fx_score`)
+- `structure_foldx_ddg.txt` - FoldX binding ΔΔG per chain pair (`--fx_mut`)
+- `structure_one_vs_all.txt` - One-vs-all PRODIGY ranking (`--one_vs_all`)
+- `structure_foldx/` - FoldX working directory with intermediate files (`--fx_score` or `--fx_mut`)
 
 ## Dependencies
 
@@ -75,6 +101,8 @@ pip install biopython networkx plotly scipy numpy prodigy-prot
 | scipy | Distance calculations (cdist) |
 | numpy | Numerical operations |
 | prodigy-prot | Binding energy calculation (ppi_graph_3d_dg.py) |
+
+For FoldX features (`--fx_score`, `--fx_mut`), [FoldX](https://foldxsuite.crg.eu/) must be installed separately (academic license required).
 
 For 3D visualization (`ppi_graph_3d.py`, `ppi_graph_3d_dg.py`), 3Dmol.js is loaded from CDN (no installation required).
 
@@ -96,6 +124,15 @@ python ppi_graph_3d_dg.py 8xks.pdb
 # Specify output directory
 python ppi_graph.py structure.cif --output-dir ./results
 python ppi_graph_3d_dg.py structure.pdb --output-dir ./results
+
+# FoldX: repair structure and score all chain pair interactions
+python ppi_graph_3d_dg.py 8xks.pdb --fx_score --fx_path /path/to/foldx
+
+# FoldX: calculate mutation effect on binding between chains
+python ppi_graph_3d_dg.py 5L08.pdb --fx_mut individual_list.txt --fx_path /path/to/foldx --skip-prodigy
+
+# One-vs-all: rank chains by total binding contribution
+python ppi_graph_3d_dg.py 8xks.pdb --one_vs_all --skip-prodigy
 ```
 
 ## Test Data
