@@ -595,6 +595,11 @@ def create_3d_visualization(G, chain_labels, structure, interactions, binding_da
             'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2,
             'color': color, 'width': width,
             'name': f"{n1}-{n2}",
+            'chain1': n1,
+            'chain2': n2,
+            'chain1_label': label1,
+            'chain2_label': label2,
+            'contacts': weight,
             'label': f"{n1} ({label1}) - {n2} ({label2}): {weight} contacts",
             'dG': dg_str,
             'Kd': kd if kd else "N/A"
@@ -784,6 +789,94 @@ def create_3d_visualization(G, chain_labels, structure, interactions, binding_da
             z-index: 5;
             pointer-events: none;
         }}
+        #graph-canvas {{
+            cursor: default;
+        }}
+        #graph-canvas.edge-hover {{
+            cursor: pointer;
+        }}
+        #complex-modal {{
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }}
+        #complex-modal.visible {{
+            display: flex;
+        }}
+        #complex-modal-content {{
+            background: white;
+            border-radius: 8px;
+            width: 900px;
+            max-width: 95%;
+            height: 700px;
+            max-height: 95%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }}
+        #complex-modal-header {{
+            padding: 12px 20px;
+            border-bottom: 1px solid #ddd;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }}
+        #complex-modal-title {{
+            font-weight: bold;
+            font-size: 15px;
+            color: #333;
+        }}
+        #complex-modal-close {{
+            background: #e6194b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1;
+        }}
+        #complex-modal-close:hover {{
+            background: #c4003a;
+        }}
+        #complex-viewer {{
+            flex: 1;
+            position: relative;
+            background: white;
+        }}
+        #complex-modal-footer {{
+            padding: 10px 20px;
+            border-top: 1px solid #ddd;
+            background: #f9f9f9;
+            font-size: 12px;
+            color: #555;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }}
+        #complex-modal-footer span b {{
+            color: #0066cc;
+        }}
+        .chain-swatch {{
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 4px;
+            vertical-align: middle;
+        }}
     </style>
 </head>
 <body>
@@ -797,9 +890,20 @@ def create_3d_visualization(G, chain_labels, structure, interactions, binding_da
         </div>
     </div>
     <div id="info">
-        Nodes: {num_nodes} chains | Edges: {num_edges} interactions | Drag nodes to rearrange
+        Nodes: {num_nodes} chains | Edges: {num_edges} interactions | Drag nodes to rearrange | Click an edge to view the pair complex
     </div>
     <div id="tooltip"></div>
+
+    <div id="complex-modal">
+        <div id="complex-modal-content">
+            <div id="complex-modal-header">
+                <div id="complex-modal-title">Complex</div>
+                <button id="complex-modal-close" title="Close">&times;</button>
+            </div>
+            <div id="complex-viewer"></div>
+            <div id="complex-modal-footer"></div>
+        </div>
+    </div>
 
     <script>
         const nodes = {nodes_json};
@@ -1000,6 +1104,145 @@ def create_3d_visualization(G, chain_labels, structure, interactions, binding_da
             legend.classList.toggle('collapsed');
             this.textContent = legend.classList.contains('collapsed') ? '+' : '≡';
         }});
+
+        // ===== Edge click → show pair complex in modal =====
+        const modal = document.getElementById('complex-modal');
+        const modalTitle = document.getElementById('complex-modal-title');
+        const modalFooter = document.getElementById('complex-modal-footer');
+        const modalClose = document.getElementById('complex-modal-close');
+        const complexViewerEl = document.getElementById('complex-viewer');
+        let complexViewer = null;
+
+        function pointToSegmentDistance(px, py, x1, y1, x2, y2) {{
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const lenSq = dx * dx + dy * dy;
+            if (lenSq === 0) {{
+                const ex = px - x1, ey = py - y1;
+                return Math.sqrt(ex * ex + ey * ey);
+            }}
+            let t = ((px - x1) * dx + (py - y1) * dy) / lenSq;
+            t = Math.max(0, Math.min(1, t));
+            const projX = x1 + t * dx;
+            const projY = y1 + t * dy;
+            const ex = px - projX, ey = py - projY;
+            return Math.sqrt(ex * ex + ey * ey);
+        }}
+
+        function findEdgeAt(mx, my) {{
+            let closest = null;
+            let closestDist = Infinity;
+            edges.forEach(edge => {{
+                const n1 = nodes.find(n => n.id === edge.chain1);
+                const n2 = nodes.find(n => n.id === edge.chain2);
+                if (!n1 || !n2) return;
+                const x1 = n1.x + 50, y1 = n1.y + 50;
+                const x2 = n2.x + 50, y2 = n2.y + 50;
+                const threshold = Math.max(edge.width, 4) + 4;
+                const d = pointToSegmentDistance(mx, my, x1, y1, x2, y2);
+                if (d <= threshold && d < closestDist) {{
+                    closest = edge;
+                    closestDist = d;
+                }}
+            }});
+            return closest;
+        }}
+
+        function showComplex(edge) {{
+            const colorA = '#4363d8';
+            const colorB = '#e6194b';
+            modalTitle.textContent = 'Complex ' + edge.chain1 + ' – ' + edge.chain2;
+            modalFooter.innerHTML =
+                '<span><span class="chain-swatch" style="background:' + colorA + '"></span>' +
+                '<b>' + edge.chain1 + '</b>: ' + edge.chain1_label + '</span>' +
+                '<span><span class="chain-swatch" style="background:' + colorB + '"></span>' +
+                '<b>' + edge.chain2 + '</b>: ' + edge.chain2_label + '</span>' +
+                '<span>Contacts: <b>' + edge.contacts + '</b></span>' +
+                '<span>ΔG: <b>' + edge.dG + '</b> kcal/mol</span>' +
+                '<span>Kd: <b>' + edge.Kd + '</b></span>';
+
+            modal.classList.add('visible');
+
+            complexViewerEl.innerHTML = '';
+            complexViewer = $3Dmol.createViewer(complexViewerEl, {{ backgroundColor: 'white' }});
+
+            const nodeA = nodes.find(n => n.id === edge.chain1);
+            const nodeB = nodes.find(n => n.id === edge.chain2);
+            if (nodeA && nodeA.pdb) {{
+                complexViewer.addModel(nodeA.pdb.replace(/\\\\n/g, '\\n'), 'pdb');
+            }}
+            if (nodeB && nodeB.pdb) {{
+                complexViewer.addModel(nodeB.pdb.replace(/\\\\n/g, '\\n'), 'pdb');
+            }}
+            complexViewer.setStyle({{chain: edge.chain1}}, {{cartoon: {{color: colorA}}}});
+            complexViewer.setStyle({{chain: edge.chain2}}, {{cartoon: {{color: colorB}}}});
+            complexViewer.zoomTo();
+            complexViewer.render();
+            setTimeout(() => {{ if (complexViewer) complexViewer.resize(); }}, 50);
+        }}
+
+        function closeModal() {{
+            modal.classList.remove('visible');
+            if (complexViewer) {{
+                try {{ complexViewer.clear(); }} catch (e) {{}}
+                complexViewer = null;
+            }}
+            complexViewerEl.innerHTML = '';
+        }}
+
+        modalClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {{ if (e.target === modal) closeModal(); }});
+        document.addEventListener('keydown', (e) => {{
+            if (e.key === 'Escape' && modal.classList.contains('visible')) closeModal();
+        }});
+
+        canvas.addEventListener('click', (e) => {{
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+            const edge = findEdgeAt(mx, my);
+            if (edge) showComplex(edge);
+        }});
+
+        canvas.addEventListener('mousemove', (e) => {{
+            const rect = canvas.getBoundingClientRect();
+            const scaleX = canvas.width / rect.width;
+            const scaleY = canvas.height / rect.height;
+            const mx = (e.clientX - rect.left) * scaleX;
+            const my = (e.clientY - rect.top) * scaleY;
+            const edge = findEdgeAt(mx, my);
+            if (edge) {{
+                canvas.classList.add('edge-hover');
+                tooltip.innerHTML = '<b>' + edge.name + '</b><br>' +
+                    edge.chain1_label + ' &harr; ' + edge.chain2_label + '<br>' +
+                    'Contacts: ' + edge.contacts + '<br>' +
+                    'ΔG: ' + edge.dG + ' kcal/mol<br>' +
+                    '<i>Click to view complex</i>';
+                tooltip.style.display = 'block';
+                tooltip.style.left = (e.pageX + 15) + 'px';
+                tooltip.style.top = (e.pageY + 15) + 'px';
+            }} else {{
+                canvas.classList.remove('edge-hover');
+                if (!draggedNode) tooltip.style.display = 'none';
+            }}
+        }});
+
+        canvas.addEventListener('mouseleave', () => {{
+            canvas.classList.remove('edge-hover');
+            tooltip.style.display = 'none';
+        }});
+
+        // Also allow legend items to open the complex
+        setTimeout(() => {{
+            const items = document.querySelectorAll('.legend-item');
+            items.forEach((item, idx) => {{
+                const edge = sortedEdges[idx];
+                if (!edge) return;
+                item.addEventListener('click', () => showComplex(edge));
+            }});
+        }}, 200);
     </script>
 </body>
 </html>

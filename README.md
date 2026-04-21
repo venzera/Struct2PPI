@@ -42,6 +42,7 @@ Features:
 - Displays ΔG values as edge labels on the graph
 - Legend sorted by binding strength (strongest interactions first)
 - Creates separate PDB files for each interacting chain pair
+- **Clickable edges** — click any edge (or legend item) to open a modal with the 3D pair complex, with the two chains colored distinctly (blue/red). Hover an edge to preview contacts + ΔG before clicking
 - Outputs binding strength ranking file
 - FoldX RepairPDB + AnalyseComplex scoring (`--fx_score`)
 - FoldX BuildModel mutation ΔΔG analysis (`--fx_mut`)
