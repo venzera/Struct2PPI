@@ -35,7 +35,7 @@ python ppi_graph_3d.py structure.pdb --cutoff 4.0
 ```
 
 ### `ppi_graph_3d_dg.py` - 3D Structures with Binding Energy (PRODIGY + FoldX)
-Network graph with 3D protein structures and binding energy (ΔG) calculated using PRODIGY for each interacting chain pair. Supports FoldX integration for force-field-based scoring and mutation analysis. **PDB files only.**
+Network graph with 3D protein structures and binding energy (ΔG) calculated using PRODIGY for each interacting chain pair. Supports FoldX integration for force-field-based scoring and mutation analysis. Accepts both PDB and mmCIF input — CIF files (e.g. AlphaFold3 output) are transparently converted to PDB via [gemmi](https://gemmi.readthedocs.io/) before running PRODIGY / FoldX.
 
 Features:
 - Calculates binding affinity (ΔG in kcal/mol) for each chain pair using PRODIGY
@@ -43,14 +43,17 @@ Features:
 - Legend sorted by binding strength (strongest interactions first)
 - Creates separate PDB files for each interacting chain pair
 - **Clickable edges** — click any edge (or legend item) to open a modal with the 3D pair complex, with the two chains colored distinctly (blue/red). Hover an edge to preview contacts + ΔG before clicking
+- **Double-click a node** — opens the same modal showing just that single chain's 3D structure
+- Chain labels come from CIF entity descriptions (or PDB `COMPND`); when unavailable (e.g. raw AlphaFold3 CIF) the chain ID itself is used as the label instead of erroring
 - Outputs binding strength ranking file
 - FoldX RepairPDB + AnalyseComplex scoring (`--fx_score`)
 - FoldX BuildModel mutation ΔΔG analysis (`--fx_mut`)
 - One-vs-all PRODIGY mode: each chain vs all others combined (`--one_vs_all`)
 
 ```bash
-# PRODIGY binding energy
+# PRODIGY binding energy (PDB or CIF)
 python ppi_graph_3d_dg.py structure.pdb
+python ppi_graph_3d_dg.py structure.cif
 python ppi_graph_3d_dg.py structure.pdb --cutoff 4.0
 python ppi_graph_3d_dg.py structure.pdb --skip-prodigy  # Skip PRODIGY (for testing)
 
@@ -79,7 +82,7 @@ According to Kastritis & Bonvin (*J Mol Biol* 2014), PRODIGY's scoring function 
 
 ## Output Files
 
-For input `structure.pdb` (or `.cif` for ppi_graph.py/ppi_graph_3d.py):
+For input `structure.pdb` (or `.cif`, supported by all three scripts):
 - `structure_ppi_graph.html` - Interactive 2D network (ppi_graph.py)
 - `structure_ppi_3d.html` - Network with 3D structure nodes (ppi_graph_3d.py)
 - `structure_ppi_3d_dg.html` - Network with 3D nodes + binding energy (ppi_graph_3d_dg.py)
@@ -95,7 +98,7 @@ For input `structure.pdb` (or `.cif` for ppi_graph.py/ppi_graph_3d.py):
 ## Dependencies
 
 ```bash
-pip install biopython networkx plotly scipy numpy prodigy-prot
+pip install biopython networkx plotly scipy numpy prodigy-prot gemmi
 ```
 
 | Package | Purpose |
@@ -106,6 +109,7 @@ pip install biopython networkx plotly scipy numpy prodigy-prot
 | scipy | Distance calculations (cdist) |
 | numpy | Numerical operations |
 | prodigy-prot | Binding energy calculation (ppi_graph_3d_dg.py) |
+| gemmi | CIF → PDB conversion for ppi_graph_3d_dg.py (PRODIGY / FoldX require PDB input) |
 
 For FoldX features (`--fx_score`, `--fx_mut`), [FoldX](https://foldxsuite.crg.eu/) must be installed separately (academic license required).
 
@@ -123,8 +127,9 @@ python ppi_graph.py structure.pdb --cutoff 4.0
 # 3D structure nodes (STRING DB style)
 python ppi_graph_3d.py 8xks.cif
 
-# 3D structure nodes with binding energy (PDB only)
+# 3D structure nodes with binding energy (PDB or CIF — CIF is auto-converted via gemmi)
 python ppi_graph_3d_dg.py 8xks.pdb
+python ppi_graph_3d_dg.py af3_prediction.cif
 
 # Specify output directory
 python ppi_graph.py structure.cif --output-dir ./results
@@ -187,3 +192,7 @@ If you use the binding energy prediction feature (`ppi_graph_3d_dg.py`), please 
 > Vangone A. and Bonvin A.M.J.J. "Contacts-based prediction of binding affinity in protein-protein complexes." *eLife*, 4:e07454 (2015). DOI: [10.7554/eLife.07454](https://doi.org/10.7554/eLife.07454)
 
 > Kastritis P.L., Rodrigues J.P.G.L.M., Folkers G.E., Boelens R., Bonvin A.M.J.J. "Proteins Feel More Than They See: Fine-Tuning of Binding Affinity by Properties of the Non-Interacting Surface." *Journal of Molecular Biology*, 14, 2632–2652 (2014). DOI: [10.1016/j.jmb.2014.04.017](https://doi.org/10.1016/j.jmb.2014.04.017)
+
+CIF → PDB conversion in `ppi_graph_3d_dg.py` uses GEMMI:
+
+> Wojdyr, Marcin. "GEMMI: A library for structural biology." *Journal of Open Source Software* 7.73 (2022): 4200. DOI: [10.21105/joss.04200](https://doi.org/10.21105/joss.04200)

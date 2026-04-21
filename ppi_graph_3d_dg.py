@@ -8,6 +8,7 @@ Calculates binding energy (ΔG) using PRODIGY for each interacting chain pair.
 
 Usage:
     python ppi_graph_3d_dg.py structure.pdb
+    python ppi_graph_3d_dg.py structure.cif
     python ppi_graph_3d_dg.py structure.pdb --cutoff 5.0
 """
 
@@ -27,6 +28,7 @@ from scipy.spatial.distance import cdist
 from Bio.PDB import PDBParser, is_aa, PDBIO, Select
 from Bio.PDB.PDBExceptions import PDBConstructionWarning
 
+import gemmi
 import networkx as nx
 
 warnings.filterwarnings('ignore', category=PDBConstructionWarning)
@@ -58,17 +60,20 @@ class ChainPairSelect(Select):
 
 def parse_structure(filepath):
     """Parse PDB file and return structure object."""
-    ext = os.path.splitext(filepath)[1].lower()
     structure_id = os.path.splitext(os.path.basename(filepath))[0]
-
-    if ext != '.pdb':
-        raise ValueError(f"Unsupported file format: {ext}. Only .pdb files are supported.")
-
     parser = PDBParser(QUIET=True)
     return parser.get_structure(structure_id, filepath)
 
 
-def get_chain_labels(filepath):
+def convert_cif_to_pdb(cif_path, pdb_path):
+    """Convert CIF to PDB using gemmi (AlphaFold3 & general CIF support)."""
+    structure = gemmi.read_structure(cif_path)
+    structure.setup_entities()
+    structure.write_pdb(pdb_path)
+    return pdb_path
+
+
+def get_chain_labels_from_pdb(filepath):
     """Extract chain labels from COMPND lines in PDB file."""
     chain_labels = {}
     current_mol = None
@@ -101,6 +106,65 @@ def get_chain_labels(filepath):
                 chain_labels[chain] = current_mol
 
     return chain_labels
+
+
+def get_chain_labels_from_cif(filepath):
+    """Extract chain labels from CIF using gemmi.
+
+    Handles missing pdbx_description gracefully (e.g. AlphaFold3 output)
+    by returning {} for unnamed chains — the caller falls back to the
+    chain id.
+    """
+    chain_labels = {}
+    try:
+        doc = gemmi.cif.read(filepath)
+        block = doc.sole_block() if len(doc) == 1 else doc[0]
+
+        entity_to_desc = {}
+        polymer_entities = set()
+        entity_loop = block.find('_entity.', ['id', 'pdbx_description', 'type'])
+        for row in entity_loop:
+            eid = row[0]
+            desc = row[1] if len(row) > 1 else ''
+            etype = row[2] if len(row) > 2 else ''
+            if etype == 'polymer':
+                polymer_entities.add(eid)
+                if desc and desc not in ('?', '.'):
+                    entity_to_desc[eid] = desc.strip('"').strip("'")
+
+        label_to_entity = {}
+        asym_loop = block.find('_struct_asym.', ['id', 'entity_id'])
+        for row in asym_loop:
+            label_to_entity[row[0]] = row[1]
+
+        label_to_auth = {}
+        atom_loop = block.find('_atom_site.', ['label_asym_id', 'auth_asym_id'])
+        for row in atom_loop:
+            label_id = row[0]
+            auth_id = row[1]
+            if label_id not in label_to_auth:
+                label_to_auth[label_id] = auth_id
+
+        for label_id, entity_id in label_to_entity.items():
+            if entity_id in polymer_entities and entity_id in entity_to_desc:
+                auth_id = label_to_auth.get(label_id, label_id)
+                if auth_id not in chain_labels:
+                    chain_labels[auth_id] = entity_to_desc[entity_id]
+
+    except Exception as e:
+        print(f"  Warning: Could not parse CIF entity info: {e}")
+
+    return chain_labels
+
+
+def get_chain_labels(filepath):
+    """Get chain labels from PDB or CIF; may return {} when unavailable."""
+    ext = os.path.splitext(filepath)[1].lower()
+    if ext == '.cif':
+        return get_chain_labels_from_cif(filepath)
+    if ext == '.pdb':
+        return get_chain_labels_from_pdb(filepath)
+    return {}
 
 
 def is_protein_chain(chain):
@@ -890,7 +954,7 @@ def create_3d_visualization(G, chain_labels, structure, interactions, binding_da
         </div>
     </div>
     <div id="info">
-        Nodes: {num_nodes} chains | Edges: {num_edges} interactions | Drag nodes to rearrange | Click an edge to view the pair complex
+        Nodes: {num_nodes} chains | Edges: {num_edges} interactions | Drag nodes to rearrange | Double-click a node to view its chain | Click an edge to view the pair complex
     </div>
     <div id="tooltip"></div>
 
@@ -1006,6 +1070,12 @@ def create_3d_visualization(G, chain_labels, structure, interactions, binding_da
                         dragOffset.y = e.clientY - rect.top;
                         div.style.zIndex = 100;
                     }}
+                }});
+
+                div.addEventListener('dblclick', (e) => {{
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showSingleChain(node);
                 }});
 
                 div.addEventListener('mouseenter', () => {{
@@ -1146,6 +1216,28 @@ def create_3d_visualization(G, chain_labels, structure, interactions, binding_da
                 }}
             }});
             return closest;
+        }}
+
+        function showSingleChain(node) {{
+            const colorA = '#4363d8';
+            modalTitle.textContent = 'Chain ' + node.id;
+            modalFooter.innerHTML =
+                '<span><span class="chain-swatch" style="background:' + colorA + '"></span>' +
+                '<b>' + node.id + '</b>: ' + (node.label || node.id) + '</span>' +
+                '<span>Interactions: <b>' + node.degree + '</b></span>' +
+                '<span>Total contacts: <b>' + node.contacts + '</b></span>';
+
+            modal.classList.add('visible');
+
+            complexViewerEl.innerHTML = '';
+            complexViewer = $3Dmol.createViewer(complexViewerEl, {{ backgroundColor: 'white' }});
+            if (node.pdb) {{
+                complexViewer.addModel(node.pdb.replace(/\\\\n/g, '\\n'), 'pdb');
+                complexViewer.setStyle({{chain: node.id}}, {{cartoon: {{color: colorA}}}});
+            }}
+            complexViewer.zoomTo();
+            complexViewer.render();
+            setTimeout(() => {{ if (complexViewer) complexViewer.resize(); }}, 50);
         }}
 
         function showComplex(edge) {{
@@ -1419,6 +1511,7 @@ def main():
         epilog="""
 Examples:
     python ppi_graph_3d_dg.py structure.pdb
+    python ppi_graph_3d_dg.py structure.cif
     python ppi_graph_3d_dg.py structure.pdb --cutoff 4.0
     python ppi_graph_3d_dg.py structure.pdb --fx_score --fx_path /path/to/foldx
     python ppi_graph_3d_dg.py structure.pdb --fx_mut mutations.txt --fx_path /path/to/foldx
@@ -1426,7 +1519,7 @@ Examples:
         """
     )
 
-    parser.add_argument('input_file', help='Input PDB file')
+    parser.add_argument('input_file', help='Input PDB or CIF file (CIF is converted to PDB via gemmi)')
     parser.add_argument('--cutoff', type=float, default=5.0,
                         help='Distance cutoff for interactions in Angstroms (default: 5.0)')
     parser.add_argument('--output-dir', type=str, default='.',
@@ -1449,8 +1542,8 @@ Examples:
         return 1
 
     ext = os.path.splitext(args.input_file)[1].lower()
-    if ext != '.pdb':
-        print(f"Error: Only PDB files are supported. Got: {ext}")
+    if ext not in ('.pdb', '.cif'):
+        print(f"Error: Only .pdb and .cif files are supported. Got: {ext}")
         return 1
 
     if (args.fx_score or args.fx_mut) and not args.fx_path:
@@ -1472,11 +1565,19 @@ Examples:
     print(f"Distance cutoff: {args.cutoff} A")
     print()
 
-    print("Parsing structure...")
-    structure = parse_structure(args.input_file)
-
+    # Extract chain labels from the original file (CIF entity info, if any)
     print("Extracting chain labels...")
     chain_labels = get_chain_labels(args.input_file)
+
+    # Convert CIF to PDB so PRODIGY / FoldX / BioPython PDBIO work downstream
+    pdb_path = args.input_file
+    if ext == '.cif':
+        pdb_path = os.path.join(args.output_dir, f"{basename}_from_cif.pdb")
+        print(f"Converting CIF to PDB via gemmi: {pdb_path}")
+        convert_cif_to_pdb(args.input_file, pdb_path)
+
+    print("Parsing structure...")
+    structure = parse_structure(pdb_path)
 
     if chain_labels:
         print(f"Found labels for {len(chain_labels)} chains")
@@ -1512,13 +1613,13 @@ Examples:
 
     if args.fx_score and interactions:
         os.makedirs(foldx_dir, exist_ok=True)
-        repaired_pdb = run_foldx_repair(args.fx_path, args.input_file, foldx_dir)
+        repaired_pdb = run_foldx_repair(args.fx_path, pdb_path, foldx_dir)
         if repaired_pdb:
             foldx_data = calculate_foldx_scores(args.fx_path, repaired_pdb, interactions, foldx_dir)
 
     if args.fx_mut and interactions:
         os.makedirs(foldx_dir, exist_ok=True)
-        repaired_pdb = fake_foldx_repair(args.input_file, foldx_dir)
+        repaired_pdb = fake_foldx_repair(pdb_path, foldx_dir)
         wt_pdb, mut_pdb, total_ddg = run_foldx_buildmodel(args.fx_path, repaired_pdb, args.fx_mut, foldx_dir)
         if total_ddg is not None:
             print(f"  Total stability ddG: {total_ddg:.2f} kcal/mol")
@@ -1528,7 +1629,7 @@ Examples:
     # One-vs-all PRODIGY
     ova_data = {}
     if args.one_vs_all:
-        ova_data = calculate_one_vs_all(args.input_file, protein_chain_ids)
+        ova_data = calculate_one_vs_all(pdb_path, protein_chain_ids)
 
     print("\nBuilding interaction graph...")
     G = build_graph(chain_labels, interactions, protein_chain_ids, binding_data)

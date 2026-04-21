@@ -491,6 +491,88 @@ def create_3d_visualization(G, chain_labels, structure, interactions, output_fil
             z-index: 1000;
             display: none;
         }}
+        #complex-modal {{
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }}
+        #complex-modal.visible {{
+            display: flex;
+        }}
+        #complex-modal-content {{
+            background: white;
+            border-radius: 8px;
+            width: 900px;
+            max-width: 95%;
+            height: 700px;
+            max-height: 95%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+        }}
+        #complex-modal-header {{
+            padding: 12px 20px;
+            border-bottom: 1px solid #ddd;
+            background: #f9f9f9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }}
+        #complex-modal-title {{
+            font-weight: bold;
+            font-size: 15px;
+            color: #333;
+        }}
+        #complex-modal-close {{
+            background: #e6194b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            line-height: 1;
+        }}
+        #complex-modal-close:hover {{
+            background: #c4003a;
+        }}
+        #complex-viewer {{
+            flex: 1;
+            position: relative;
+            background: white;
+        }}
+        #complex-modal-footer {{
+            padding: 10px 20px;
+            border-top: 1px solid #ddd;
+            background: #f9f9f9;
+            font-size: 12px;
+            color: #555;
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+        }}
+        #complex-modal-footer span b {{
+            color: #0066cc;
+        }}
+        .chain-swatch {{
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            margin-right: 4px;
+            vertical-align: middle;
+        }}
     </style>
 </head>
 <body>
@@ -503,9 +585,20 @@ def create_3d_visualization(G, chain_labels, structure, interactions, output_fil
         </div>
     </div>
     <div id="info">
-        Nodes: {num_nodes} chains | Edges: {num_edges} interactions | Drag nodes to rearrange
+        Nodes: {num_nodes} chains | Edges: {num_edges} interactions | Drag nodes to rearrange | Double-click a node to view its chain
     </div>
     <div id="tooltip"></div>
+
+    <div id="complex-modal">
+        <div id="complex-modal-content">
+            <div id="complex-modal-header">
+                <div id="complex-modal-title">Chain</div>
+                <button id="complex-modal-close" title="Close">&times;</button>
+            </div>
+            <div id="complex-viewer"></div>
+            <div id="complex-modal-footer"></div>
+        </div>
+    </div>
 
     <script>
         const nodes = {nodes_json};
@@ -569,6 +662,12 @@ def create_3d_visualization(G, chain_labels, structure, interactions, output_fil
                         dragOffset.y = e.clientY - rect.top;
                         div.style.zIndex = 100;
                     }}
+                }});
+
+                div.addEventListener('dblclick', (e) => {{
+                    e.preventDefault();
+                    e.stopPropagation();
+                    showSingleChain(node);
                 }});
 
                 div.addEventListener('mouseenter', () => {{
@@ -656,6 +755,51 @@ def create_3d_visualization(G, chain_labels, structure, interactions, output_fil
         createLegend();
 
         setTimeout(initViewers, 100);
+
+        // ===== Double-click node → show single chain in modal =====
+        const modal = document.getElementById('complex-modal');
+        const modalTitle = document.getElementById('complex-modal-title');
+        const modalFooter = document.getElementById('complex-modal-footer');
+        const modalClose = document.getElementById('complex-modal-close');
+        const complexViewerEl = document.getElementById('complex-viewer');
+        let complexViewer = null;
+
+        function showSingleChain(node) {{
+            const colorA = '#4363d8';
+            modalTitle.textContent = 'Chain ' + node.id;
+            modalFooter.innerHTML =
+                '<span><span class="chain-swatch" style="background:' + colorA + '"></span>' +
+                '<b>' + node.id + '</b>: ' + (node.label || node.id) + '</span>' +
+                '<span>Interactions: <b>' + node.degree + '</b></span>' +
+                '<span>Total contacts: <b>' + node.contacts + '</b></span>';
+
+            modal.classList.add('visible');
+
+            complexViewerEl.innerHTML = '';
+            complexViewer = $3Dmol.createViewer(complexViewerEl, {{ backgroundColor: 'white' }});
+            if (node.pdb) {{
+                complexViewer.addModel(node.pdb.replace(/\\\\n/g, '\\n'), 'pdb');
+                complexViewer.setStyle({{chain: node.id}}, {{cartoon: {{color: colorA}}}});
+            }}
+            complexViewer.zoomTo();
+            complexViewer.render();
+            setTimeout(() => {{ if (complexViewer) complexViewer.resize(); }}, 50);
+        }}
+
+        function closeModal() {{
+            modal.classList.remove('visible');
+            if (complexViewer) {{
+                try {{ complexViewer.clear(); }} catch (e) {{}}
+                complexViewer = null;
+            }}
+            complexViewerEl.innerHTML = '';
+        }}
+
+        modalClose.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {{ if (e.target === modal) closeModal(); }});
+        document.addEventListener('keydown', (e) => {{
+            if (e.key === 'Escape' && modal.classList.contains('visible')) closeModal();
+        }});
     </script>
 </body>
 </html>
