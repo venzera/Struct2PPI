@@ -222,6 +222,107 @@ def _fmt(v):
         return None
 
 
+def _normalize_layout(G):
+    """Spring layout -> pixel coordinates in the 1400x1000 canvas."""
+    if len(G.nodes()) <= 1:
+        pos = {n: (0.0, 0.0) for n in G.nodes()}
+    else:
+        pos = nx.spring_layout(G, k=3, iterations=100, seed=42)
+    xs = [p[0] for p in pos.values()] or [0]
+    ys = [p[1] for p in pos.values()] or [0]
+    x_min, x_max = min(xs), max(xs)
+    y_min, y_max = min(ys), max(ys)
+    xr = (x_max - x_min) or 1
+    yr = (y_max - y_min) or 1
+    return {n: (100 + (x - x_min) / xr * 1200, 100 + (y - y_min) / yr * 800)
+            for n, (x, y) in pos.items()}
+
+
+def find_structure_file(path):
+    """Return (struct_path, fmt) for a file or the best structure inside a folder."""
+    if os.path.isfile(path):
+        return path, ('cif' if path.endswith('.cif') else 'pdb')
+    cands = []
+    for root, _dirs, files in os.walk(path):
+        for f in files:
+            if f.endswith(('.cif', '.pdb')) and not f.startswith('._'):
+                cands.append(os.path.join(root, f))
+    if not cands:
+        return None, None
+    cands.sort(key=lambda p: (0 if ('model_0' in p or 'rank_0' in p) else 1, p))
+    return cands[0], ('cif' if cands[0].endswith('.cif') else 'pdb')
+
+
+def detect_contacts(structure, cutoff=5.0):
+    """Distance-based residue contacts between protein chains (heavy atoms)."""
+    from scipy.spatial.distance import cdist
+    chains = {}
+    for chain in structure[0]:
+        coords, resids = [], []
+        for res in chain:
+            if res.id[0] != ' ' or not is_aa(res, standard=True):
+                continue
+            for atom in res:
+                if atom.element == 'H':
+                    continue
+                coords.append(atom.coord)
+                resids.append(res.id[1])
+        if coords:
+            chains[chain.id] = (np.array(coords), np.array(resids))
+    ids = list(chains)
+    contacts = {}
+    for a in range(len(ids)):
+        for b in range(a + 1, len(ids)):
+            ca, ra = chains[ids[a]]
+            cb, rb = chains[ids[b]]
+            d = cdist(ca, cb)
+            ai, bi = np.where(d < cutoff)
+            if len(ai):
+                pairs = set(zip(ra[ai].tolist(), rb[bi].tolist()))
+                contacts[(ids[a], ids[b])] = len(pairs)
+    return ids, contacts
+
+
+def build_structure_only_payload(struct_path, fmt, cutoff=5.0):
+    """Node/edge JSON when no PAE is available: contacts + pLDDT, no LIS."""
+    structure = load_biopython_structure(struct_path, fmt)
+    with open(struct_path) as fh:
+        struct_text = fh.read()
+    plddt = lis_lib.compute_chain_plddt(struct_text, fmt)
+    chain_ids, contacts = detect_contacts(structure, cutoff)
+
+    G = nx.Graph()
+    for c in chain_ids:
+        G.add_node(c)
+    for (c1, c2), n in contacts.items():
+        G.add_edge(c1, c2, weight=n)
+    npos = _normalize_layout(G)
+
+    nodes_js = []
+    for c in chain_ids:
+        x, y = npos.get(c, (600, 450))
+        nodes_js.append({
+            'id': c, 'x': x, 'y': y, 'label': c,
+            'plddt': None if plddt.get(c) is None else round(plddt[c], 1),
+            'degree': G.degree(c) if c in G else 0,
+            'pdb': chain_pdb_string(structure, c),
+        })
+
+    items = sorted(contacts.items(), key=lambda kv: -kv[1])
+    edges_js = []
+    for idx, ((c1, c2), n) in enumerate(items):
+        x1, y1 = npos[c1]
+        x2, y2 = npos[c2]
+        edges_js.append({
+            'name': f"{c1}-{c2}", 'chain1': c1, 'chain2': c2,
+            'x1': x1, 'y1': y1, 'x2': x2, 'y2': y2,
+            'color': EDGE_COLORS[idx % len(EDGE_COLORS)],
+            'width': float(min(2 + np.log1p(n), 8)),
+            'positive': True, 'contacts': int(n),
+        })
+    return nodes_js, edges_js
+
+
 # ============================================================================
 # HTML rendering
 # ============================================================================
@@ -325,22 +426,17 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 </head>
 <body>
     <h1>Predicted PPI Graph: __TITLE__</h1>
-    <div id="mode-banner">
-        <b>PREDICTED MODE</b> &nbsp;|&nbsp; platform: <b>__PLATFORM__</b>
-        &nbsp;|&nbsp; model: <b>__MODELNAME__</b>
-        &nbsp;|&nbsp; scoring: LIS / cLIS / iLIS (PAE + contacts)
-        &nbsp;|&nbsp; iLIS &ge; __THRESH__ = likely interaction
-    </div>
+    <div id="mode-banner">__BANNER__</div>
     <div id="container">
         <canvas id="graph-canvas"></canvas>
         <div id="legend">
-            <h3>Chain pairs (by iLIS)</h3>
+            <h3>__LEGEND_TITLE__</h3>
             <div id="legend-items"></div>
         </div>
     </div>
     <div id="info">
-        __NNODES__ chains | __NEDGES__ scored chain pairs | Drag nodes to rearrange |
-        Double-click a node for its chain + pLDDT | Click an edge for PAE / cLIA maps + LIS scores
+        __NNODES__ chains | __NEDGES__ chain pairs | Drag nodes to rearrange |
+        Double-click a node for its chain + pLDDT | __INFO_HINT__
     </div>
     <div id="tooltip"></div>
 
@@ -378,6 +474,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         const nodes = __NODES_JSON__;
         const edges = __EDGES_JSON__;
         const ILIS_THRESHOLD = __THRESH__;
+        const HAS_SCORES = __HAS_SCORES__;
         const sortedEdges = [...edges];
 
         const container = document.getElementById('container');
@@ -422,7 +519,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
                 if (n1 && n2) {
                     const el = document.createElement('div');
                     el.className = 'edge-label';
-                    el.textContent = 'iLIS ' + edge.iLIS.toFixed(3);
+                    el.textContent = HAS_SCORES ? ('iLIS ' + edge.iLIS.toFixed(3))
+                                                : (edge.contacts + ' contacts');
                     el.style.left = ((n1.x + n2.x) / 2 + 50) + 'px';
                     el.style.top = ((n1.y + n2.y) / 2 + 50) + 'px';
                     container.appendChild(el);
@@ -494,11 +592,14 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             sortedEdges.forEach(edge => {
                 const item = document.createElement('div');
                 item.className = 'legend-item';
+                const detail = HAS_SCORES
+                    ? ('iLIS ' + edge.iLIS.toFixed(3) + ' | LIS ' + edge.LIS.toFixed(3) +
+                       ' | cLIS ' + edge.cLIS.toFixed(3))
+                    : (edge.contacts + ' residue contacts');
                 item.innerHTML = '<div class="legend-color" style="background:' + edge.color + '"></div>' +
                     '<div class="legend-text"><span class="legend-name">' + edge.name +
-                    (edge.positive ? ' <span class="pos-dot">&#10003;</span>' : '') + '</span>' +
-                    '<span class="legend-ilis">iLIS ' + edge.iLIS.toFixed(3) +
-                    ' | LIS ' + edge.LIS.toFixed(3) + ' | cLIS ' + edge.cLIS.toFixed(3) + '</span></div>';
+                    (HAS_SCORES && edge.positive ? ' <span class="pos-dot">&#10003;</span>' : '') + '</span>' +
+                    '<span class="legend-ilis">' + detail + '</span></div>';
                 item.addEventListener('click', () => showInteraction(edge));
                 box.appendChild(item);
             });
@@ -582,7 +683,38 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         function row(k, v) { return '<tr><td class="k">' + k + '</td><td class="v">' + v + '</td></tr>'; }
         function fmt(v, d) { return (v == null) ? '&ndash;' : (typeof v === 'number' ? v.toFixed(d) : v); }
 
+        const modalRight = document.getElementById('modal-right');
+
+        function open3DPair(edge) {
+            const colorA = '#4363d8', colorB = '#e6194b';
+            viewer3dEl.innerHTML = '';
+            modalViewer = $3Dmol.createViewer(viewer3dEl, { backgroundColor: 'white' });
+            const nA = nodes.find(n => n.id === edge.chain1);
+            const nB = nodes.find(n => n.id === edge.chain2);
+            if (nA && nA.pdb) modalViewer.addModel(nA.pdb, 'pdb');
+            if (nB && nB.pdb) modalViewer.addModel(nB.pdb, 'pdb');
+            modalViewer.setStyle({chain: edge.chain1}, {cartoon: {color: colorA}});
+            modalViewer.setStyle({chain: edge.chain2}, {cartoon: {color: colorB}});
+            modalViewer.zoomTo(); modalViewer.render();
+            setTimeout(() => { if (modalViewer) modalViewer.resize(); }, 60);
+        }
+
+        function showInteractionNoScores(edge) {
+            modalTitle.innerHTML = 'Interaction ' + edge.chain1 + ' &ndash; ' + edge.chain2;
+            verdictEl.className = 'verdict neg';
+            verdictEl.innerHTML = 'Score files (PAE) were not provided &mdash; LIS metrics unavailable.';
+            scoreTable.innerHTML = '<table>' +
+                row('Chain pair', edge.chain1 + ' &ndash; ' + edge.chain2) +
+                row('Residue contacts', edge.contacts) + '</table>';
+            modalRight.style.display = 'none';
+            clearPlots();
+            modal.classList.add('visible');
+            open3DPair(edge);
+        }
+
         function showInteraction(edge) {
+            if (!HAS_SCORES) { showInteractionNoScores(edge); return; }
+            modalRight.style.display = 'flex';
             const colorA = '#4363d8', colorB = '#e6194b';
             modalTitle.innerHTML = 'Interaction ' + edge.chain1 + ' &ndash; ' + edge.chain2 +
                 ' &nbsp;<span style="color:#0066cc">iLIS ' + edge.iLIS.toFixed(3) + '</span>';
@@ -636,6 +768,7 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
                 row('avg pLDDT', fmt(node.plddt, 1)) +
                 row('Interactions', node.degree) + '</table>';
             paeAxis.innerHTML = ''; cliaAxis.innerHTML = '';
+            modalRight.style.display = 'none';
             modal.classList.add('visible');
             clearPlots();
             viewer3dEl.innerHTML = '';
@@ -694,10 +827,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             const edge = findEdgeAt(mx, my);
             if (edge) {
                 canvas.classList.add('edge-hover');
-                tooltip.innerHTML = '<b>' + edge.name + '</b><br>' +
-                    'iLIS: ' + edge.iLIS.toFixed(3) + (edge.positive ? ' &#10003;' : '') + '<br>' +
-                    'LIS: ' + edge.LIS.toFixed(3) + ' | cLIS: ' + edge.cLIS.toFixed(3) + '<br>' +
-                    'ipTM: ' + fmt(edge.ipTM, 3) + '<br><i>Click for PAE / cLIA maps</i>';
+                tooltip.innerHTML = HAS_SCORES
+                    ? ('<b>' + edge.name + '</b><br>' +
+                       'iLIS: ' + edge.iLIS.toFixed(3) + (edge.positive ? ' &#10003;' : '') + '<br>' +
+                       'LIS: ' + edge.LIS.toFixed(3) + ' | cLIS: ' + edge.cLIS.toFixed(3) + '<br>' +
+                       'ipTM: ' + fmt(edge.ipTM, 3) + '<br><i>Click for PAE / cLIA maps</i>')
+                    : ('<b>' + edge.name + '</b><br>' + edge.contacts +
+                       ' residue contacts<br><i>Click to view pair (no LIS: scores not provided)</i>');
                 tooltip.style.display = 'block';
                 tooltip.style.left = (e.pageX + 15) + 'px';
                 tooltip.style.top = (e.pageY + 15) + 'px';
@@ -716,11 +852,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
 """
 
 
-def render_html(model, nodes_js, edges_js, output_file, title):
+def render_html(nodes_js, edges_js, output_file, title, banner, legend_title, info_hint, has_scores):
     html = (HTML_TEMPLATE
             .replace('__TITLE__', title)
-            .replace('__PLATFORM__', model['platform'])
-            .replace('__MODELNAME__', f"{model['name']} (rank {model['rank']})")
+            .replace('__BANNER__', banner)
+            .replace('__LEGEND_TITLE__', legend_title)
+            .replace('__INFO_HINT__', info_hint)
+            .replace('__HAS_SCORES__', 'true' if has_scores else 'false')
             .replace('__THRESH__', str(lis_lib.ILIS_THRESHOLD))
             .replace('__NNODES__', str(len(nodes_js)))
             .replace('__NEDGES__', str(len(edges_js)))
@@ -729,6 +867,28 @@ def render_html(model, nodes_js, edges_js, output_file, title):
     with open(output_file, 'w') as f:
         f.write(html)
     print(f"Saved predicted PPI graph: {output_file}")
+
+
+def render_scored(model, nodes_js, edges_js, output_file, title):
+    banner = (f"<b>PREDICTED MODE</b> &nbsp;|&nbsp; platform: <b>{model['platform']}</b>"
+              f" &nbsp;|&nbsp; model: <b>{model['name']} (rank {model['rank']})</b>"
+              f" &nbsp;|&nbsp; scoring: LIS / cLIS / iLIS (PAE + contacts)"
+              f" &nbsp;|&nbsp; iLIS &ge; {lis_lib.ILIS_THRESHOLD} = likely interaction")
+    render_html(nodes_js, edges_js, output_file, title, banner,
+                legend_title='Chain pairs (by iLIS)',
+                info_hint='Click an edge for PAE / cLIA maps + LIS scores',
+                has_scores=True)
+
+
+def render_unscored(struct_name, nodes_js, edges_js, output_file, title):
+    banner = (f"<b>PREDICTED MODE</b> &nbsp;|&nbsp; "
+              f"<b style=\"color:#ff8a80\">score files (PAE) not provided</b>"
+              f" &nbsp;|&nbsp; structure-only PPI graph (no LIS metrics)"
+              f" &nbsp;|&nbsp; source: <b>{struct_name}</b>")
+    render_html(nodes_js, edges_js, output_file, title, banner,
+                legend_title='Chain pairs (by contacts)',
+                info_hint='Click an edge to view the pair complex (no LIS: scores not provided)',
+                has_scores=False)
 
 
 # ============================================================================
@@ -757,8 +917,24 @@ def save_lis_scores(model, output_file):
 # Modes
 # ============================================================================
 
-def run_predicted(path, output_dir, model_req, edge_min_ilis, pae_cutoff, cb_cutoff):
-    models = lis_lib.analyze_prediction(path, pae_cutoff=pae_cutoff, cb_cutoff=cb_cutoff)
+def run_predicted(path, output_dir, model_req, edge_min_ilis, pae_cutoff, cb_cutoff,
+                  contact_cutoff=5.0):
+    os.makedirs(output_dir, exist_ok=True)
+    try:
+        models = lis_lib.analyze_prediction(path, pae_cutoff=pae_cutoff, cb_cutoff=cb_cutoff)
+    except ValueError:
+        # No PAE/score files -> structure-only PPI graph (no LIS metrics)
+        struct_path, fmt = find_structure_file(path)
+        if not struct_path:
+            raise SystemExit(f"Error: no structure (.cif/.pdb) found at {path}")
+        base = os.path.splitext(os.path.basename(struct_path))[0]
+        print("No PAE / score files found — generating a structure-only PPI graph "
+              "(contacts + pLDDT, no LIS metrics).")
+        nodes_js, edges_js = build_structure_only_payload(struct_path, fmt, contact_cutoff)
+        html_out = os.path.join(output_dir, f"{base}_predicted_ppi.html")
+        render_unscored(os.path.basename(struct_path), nodes_js, edges_js, html_out, base)
+        return None
+
     model = select_model(models, model_req)
     print(f"Platform: {model['platform']} | models found: {len(models)} | "
           f"using model '{model['name']}' rank {model['rank']} "
@@ -766,10 +942,9 @@ def run_predicted(path, output_dir, model_req, edge_min_ilis, pae_cutoff, cb_cut
 
     nodes_js, edges_js, _G = build_payload(model, edge_min_ilis=edge_min_ilis)
     base = model['name'] or 'prediction'
-    os.makedirs(output_dir, exist_ok=True)
     html_out = os.path.join(output_dir, f"{base}_predicted_ppi.html")
     txt_out = os.path.join(output_dir, f"{base}_lis_scores.txt")
-    render_html(model, nodes_js, edges_js, html_out, base)
+    render_scored(model, nodes_js, edges_js, html_out, base)
     save_lis_scores(model, txt_out)
     return model
 
@@ -804,7 +979,7 @@ def run_batch_dimer(parent, output_dir, pae_cutoff, cb_cutoff):
         nodes_js, edges_js, _G = build_payload(best_model)
         base = best_model['name'] or os.path.basename(sub)
         html_out = os.path.join(output_dir, f"{base}_predicted_ppi.html")
-        render_html(best_model, nodes_js, edges_js, html_out, base)
+        render_scored(best_model, nodes_js, edges_js, html_out, base)
         rows.append((base, best_model['platform'], best_model['rank'], best_pair))
         print(f"  {base}: best iLIS {best_pair['iLIS']:.3f} "
               f"({best_pair['ci']}-{best_pair['cj']}, rank {best_model['rank']})")
@@ -845,6 +1020,9 @@ def main():
                         help='Only draw edges with iLIS >= this value (default: 0, draw all).')
     parser.add_argument('--pae-cutoff', type=float, default=12.0, help='PAE cutoff (default 12).')
     parser.add_argument('--cb-cutoff', type=float, default=8.0, help='Cb contact cutoff Å (default 8).')
+    parser.add_argument('--contact-cutoff', type=float, default=5.0,
+                        help='Heavy-atom contact cutoff Å for the structure-only fallback '
+                             'when no PAE/score files are provided (default 5).')
     parser.add_argument('--output-dir', default='.', help='Output directory (default: current).')
     args = parser.parse_args()
 
@@ -853,7 +1031,7 @@ def main():
             run_batch_dimer(args.input, args.output_dir, args.pae_cutoff, args.cb_cutoff)
         else:
             run_predicted(args.input, args.output_dir, args.model, args.edge_min_ilis,
-                          args.pae_cutoff, args.cb_cutoff)
+                          args.pae_cutoff, args.cb_cutoff, args.contact_cutoff)
     except ValueError as e:
         raise SystemExit(f"Error: {e}")
 

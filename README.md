@@ -104,13 +104,13 @@ python ppi_graph_predicted.py /path/to/predictions/ --output-dir ./results
 python ppi_graph_predicted.py /path/to/dimers_parent_folder/ --batch-dimer-predicted
 ```
 
-> **Input must include the predictor's PAE / confidence file — not just the structure.**
+> **For LIS scoring, the input must include the predictor's PAE / confidence file — not just the structure.**
 > LIS is computed from the Predicted Aligned Error, which is **not** stored in the `.cif`/`.pdb`. Point the tool at the *whole output folder*, which must contain:
 > - **AlphaFold3:** `*_model_N.cif` **+** `*_full_data_N.json` (PAE) **+** `*_summary_confidences_N.json`
 > - **Boltz:** `*_model_N.cif/.pdb` **+** `confidence_*.json` / `pae_*.npz`
 > - **Chai-1:** `pred.*.cif` **+** `scores.*.json` **+** `pae.*.npy/.npz`
 >
-> A structure file on its own (e.g. an AlphaFold Server `fold_*_model_N.cif` downloaded without its `full_data` JSON) cannot be scored and the tool exits with a message saying which companion file is missing.
+> **Structure-only fallback:** if no PAE/score file is found (e.g. an AlphaFold Server `fold_*_model_N.cif` downloaded without its `full_data` JSON), the tool still builds a PPI graph — using distance-based residue contacts and per-chain pLDDT from the model — and the HTML banner states *"score files (PAE) not provided"* with no LIS metrics shown.
 
 #### Flags
 
@@ -209,24 +209,6 @@ python ppi_graph_3d_dg.py 8xks.pdb --one_vs_all --skip-prodigy
 ## Test Data
 
 The `test/` folder contains example outputs generated from PDB entry 8XKS (20 protein chains, 81 interactions).
-
-### Predicted mode — CTCF / RAD21 (AlphaFold3)
-
-`test/fold_ctcf_rad21_branchio/` is a complete AlphaFold3 server output (3 chains: CTCF + two RAD21 fragments) used to exercise predicted mode end-to-end:
-
-```bash
-python ppi_graph_predicted.py test/fold_ctcf_rad21_branchio --output-dir test/fold_ctcf_rad21_branchio
-```
-
-All three chain pairs score as positive interactions (iLIS ≥ 0.223):
-
-| Pair | iLIS | LIS | cLIS | LIA | cLIA | ipTM |
-|------|------|-----|------|-----|------|------|
-| A–B | 0.766 | 0.667 | 0.879 | 18507 | 134 | 0.940 |
-| B–C | 0.651 | 0.572 | 0.740 | 539 | 10 | 0.420 |
-| A–C | 0.630 | 0.538 | 0.736 | 5626 | 40 | 0.830 |
-
-`test/fold_p53_mdm2_model_2.cif` is included as the *counter-example*: a structure-only AlphaFold Server download with **no** `full_data` PAE JSON. Running predicted mode on it exits with a message stating which companion file is required — illustrating that the scores/PAE file (not just the model) is mandatory for LIS.
 
 ### 5L08 — Pairwise vs One-vs-All (Caspase-8 tDED filament)
 
