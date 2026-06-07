@@ -257,11 +257,11 @@ If you use the binding energy prediction feature (`ppi_graph_3d_dg.py`), please 
 
 > Kastritis P.L., Rodrigues J.P.G.L.M., Folkers G.E., Boelens R., Bonvin A.M.J.J. "Proteins Feel More Than They See: Fine-Tuning of Binding Affinity by Properties of the Non-Interacting Surface." *Journal of Molecular Biology*, 14, 2632–2652 (2014). DOI: [10.1016/j.jmb.2014.04.017](https://doi.org/10.1016/j.jmb.2014.04.017)
 
-If you use predicted mode (`ppi_graph_predicted.py`) and the LIS / cLIS / iLIS metrics, please cite LIVIA / AFM-LIS:
+If you use predicted mode (`ppi_graph_predicted.py`), please cite LIVIA (the tool) and FlyPredictome (the iLIS metric):
 
-> Kim, Ah-Ram, and Norbert Perrimon. "LIVIA: a browser-based tool for assessing and visualizing predicted protein interactions." *bioRxiv* (2026): 2026-05.
+> Kim, Ah-Ram, and Norbert Perrimon. "LIVIA: a browser-based tool for assessing and visualizing predicted protein interactions." *bioRxiv* (2026). DOI: [10.64898/2026.05.01.721633](https://doi.org/10.64898/2026.05.01.721633)
 
-> Kim A.-R., et al. "Enhanced Protein-Protein Interaction Discovery via AlphaFold-Multimer." *bioRxiv* (2024). DOI: [10.1101/2024.02.19.580970](https://www.biorxiv.org/content/10.1101/2024.02.19.580970v1)
+> Kim A.-R., Comjean A., Veal A., Rodiger J., Han M., Hu Y., Perrimon N. "FlyPredictome: A structural atlas of predicted protein-protein interactions in *Drosophila*." *bioRxiv* (2026). DOI: [10.64898/2026.04.14.718529](https://doi.org/10.64898/2026.04.14.718529)
 
 The LIS implementation in `lis_lib.py` is adapted from the AFM-LIS reference code: [github.com/flyark/AFM-LIS](https://github.com/flyark/AFM-LIS).
 

@@ -23,7 +23,9 @@ adaptation of AFM-LIS: no parallelism, no archive handling, no ChimeraX export).
 Reference:
     Kim, Ah-Ram, and Norbert Perrimon. "LIVIA: a browser-based tool for
     assessing and visualizing predicted protein interactions."
-    bioRxiv (2026): 2026-05.
+    bioRxiv (2026). doi:10.64898/2026.05.01.721633
+    iLIS metric: Kim A.-R. et al. "FlyPredictome." bioRxiv (2026).
+    doi:10.64898/2026.04.14.718529
 
 Usage:
     python ppi_graph_predicted.py /path/to/af3_output_folder

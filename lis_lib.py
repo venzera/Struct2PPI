@@ -19,7 +19,9 @@ Supported platforms (auto-detected): AlphaFold3, Boltz, Chai-1 (+ generic).
 Reference:
     Kim, Ah-Ram, and Norbert Perrimon. "LIVIA: a browser-based tool for
     assessing and visualizing predicted protein interactions."
-    bioRxiv (2026): 2026-05.
+    bioRxiv (2026). doi:10.64898/2026.05.01.721633
+    iLIS metric: Kim A.-R. et al. "FlyPredictome." bioRxiv (2026).
+    doi:10.64898/2026.04.14.718529
 """
 
 import io
