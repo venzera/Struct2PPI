@@ -3,6 +3,7 @@
 <head>
     <title>Predicted PPI Graph: fold_ctcf_rad21_branchio</title>
     <script src="https://3Dmol.org/build/3Dmol-min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.27.0.min.js"></script>
     <style>
         body { font-family: Arial, sans-serif; margin: 0; padding: 20px; background: #f5f5f5; }
         h1 { text-align: center; color: #333; margin-bottom: 4px; }
@@ -89,7 +90,7 @@
         .map-block { margin-bottom: 14px; }
         .map-block h4 { margin: 4px 0; font-size: 13px; color: #333; }
         .map-block .axis { font-size: 11px; color: #888; }
-        canvas.heatmap { border: 1px solid #ccc; image-rendering: pixelated; }
+        .plot { width: 100%; height: 300px; }
         .colorbar { font-size: 10px; color: #666; margin-top: 2px; }
         .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
     </style>
@@ -131,15 +132,12 @@
                     <div class="map-block">
                         <h4>PAE interaction plot (inter-chain)</h4>
                         <div class="axis" id="pae-axis"></div>
-                        <canvas class="heatmap" id="pae-canvas"></canvas>
-                        <div class="colorbar">PAE (&Aring;): <span class="swatch" style="background:#1a9850"></span>0 (confident)
-                            <span class="swatch" style="background:#fee08b"></span>12
-                            <span class="swatch" style="background:#a50026"></span>&ge;31 (uncertain)</div>
+                        <div class="plot" id="pae-plot"></div>
                     </div>
                     <div class="map-block">
                         <h4>Contact-filtered LIA map (cLIA)</h4>
                         <div class="axis" id="clia-axis"></div>
-                        <canvas class="heatmap" id="clia-canvas"></canvas>
+                        <div class="plot" id="clia-plot"></div>
                         <div class="colorbar"><span class="swatch" style="background:#08306b"></span>confident contact (PAE&le;12 &amp; C&beta;&le;8&Aring;)
                             <span class="swatch" style="background:#f7fbff;border:1px solid #ccc"></span>none</div>
                     </div>
@@ -298,37 +296,49 @@
         createNodes(); createEdgeLabels(); drawEdges(); createLegend();
         setTimeout(initViewers, 100);
 
-        // ===== Heatmap drawing =====
-        function paeColor(v) {
-            // 0 -> green (confident), 12 -> yellow, >=31 -> dark red
-            const stops = [[0,26,152,80],[12,254,224,139],[31,165,0,38]];
-            v = Math.max(0, Math.min(31, v));
-            let a = stops[0], b = stops[2];
-            for (let k = 0; k < stops.length - 1; k++) {
-                if (v >= stops[k][0] && v <= stops[k+1][0]) { a = stops[k]; b = stops[k+1]; break; }
-            }
-            const t = (v - a[0]) / ((b[0] - a[0]) || 1);
-            const r = Math.round(a[1] + t * (b[1] - a[1]));
-            const g = Math.round(a[2] + t * (b[2] - a[2]));
-            const bl = Math.round(a[3] + t * (b[3] - a[3]));
-            return 'rgb(' + r + ',' + g + ',' + bl + ')';
+        // ===== Plotly heatmaps (ColabFold style) =====
+        // bwr colorscale: blue (confident, 0) -> white -> red (uncertain, 30)
+        const BWR = [[0.0, 'rgb(0,0,255)'], [0.5, 'rgb(255,255,255)'], [1.0, 'rgb(255,0,0)']];
+        const CLIA_SCALE = [[0.0, '#f7fbff'], [1.0, '#08306b']];
+
+        function plotPAE(divId, edge) {
+            const div = document.getElementById(divId);
+            if (!edge || !edge.pae_map || !edge.pae_map.length) { Plotly.purge(div); return; }
+            const data = [{
+                z: edge.pae_map, x: edge.res_j, y: edge.res_i, type: 'heatmap',
+                colorscale: BWR, zmin: 0, zmax: 30, zsmooth: false,
+                colorbar: { title: 'PAE (Å)', titleside: 'right', thickness: 12, len: 0.9 },
+                hovertemplate: edge.chain1 + ' %{y} · ' + edge.chain2 + ' %{x}<br>PAE %{z:.1f} Å<extra></extra>'
+            }];
+            const layout = {
+                margin: { l: 44, r: 10, t: 6, b: 36 },
+                xaxis: { title: 'chain ' + edge.chain2, constrain: 'domain' },
+                yaxis: { title: 'chain ' + edge.chain1, autorange: 'reversed', scaleanchor: 'x', constrain: 'domain' },
+                font: { size: 10 }
+            };
+            Plotly.react(div, data, layout, { displayModeBar: false, responsive: true });
         }
 
-        function drawHeatmap(canvasId, matrix, kind) {
-            const cv = document.getElementById(canvasId);
-            if (!matrix || !matrix.length) { cv.width = 0; cv.height = 0; return; }
-            const rows = matrix.length, cols = matrix[0].length;
-            const maxPx = 320;
-            const cell = Math.max(1, Math.floor(maxPx / Math.max(rows, cols)));
-            cv.width = cols * cell; cv.height = rows * cell;
-            const c = cv.getContext('2d');
-            for (let i = 0; i < rows; i++) {
-                for (let j = 0; j < cols; j++) {
-                    if (kind === 'pae') c.fillStyle = paeColor(matrix[i][j]);
-                    else c.fillStyle = matrix[i][j] ? '#08306b' : '#f7fbff';
-                    c.fillRect(j * cell, i * cell, cell, cell);
-                }
-            }
+        function plotCLIA(divId, edge) {
+            const div = document.getElementById(divId);
+            if (!edge || !edge.clia_map || !edge.clia_map.length) { Plotly.purge(div); return; }
+            const data = [{
+                z: edge.clia_map, x: edge.res_j, y: edge.res_i, type: 'heatmap',
+                colorscale: CLIA_SCALE, zmin: 0, zmax: 1, showscale: false,
+                hovertemplate: edge.chain1 + ' %{y} · ' + edge.chain2 + ' %{x}<br>%{z}<extra></extra>'
+            }];
+            const layout = {
+                margin: { l: 44, r: 10, t: 6, b: 36 },
+                xaxis: { title: 'chain ' + edge.chain2, constrain: 'domain' },
+                yaxis: { title: 'chain ' + edge.chain1, autorange: 'reversed', scaleanchor: 'x', constrain: 'domain' },
+                font: { size: 10 }
+            };
+            Plotly.react(div, data, layout, { displayModeBar: false, responsive: true });
+        }
+
+        function clearPlots() {
+            Plotly.purge(document.getElementById('pae-plot'));
+            Plotly.purge(document.getElementById('clia-plot'));
         }
 
         // ===== Modal =====
@@ -374,8 +384,8 @@
             cliaAxis.innerHTML = paeAxis.innerHTML;
 
             modal.classList.add('visible');
-            drawHeatmap('pae-canvas', edge.pae_map, 'pae');
-            drawHeatmap('clia-canvas', edge.clia_map, 'clia');
+            plotPAE('pae-plot', edge);
+            plotCLIA('clia-plot', edge);
 
             viewer3dEl.innerHTML = '';
             modalViewer = $3Dmol.createViewer(viewer3dEl, { backgroundColor: 'white' });
@@ -399,8 +409,7 @@
                 row('Interactions', node.degree) + '</table>';
             paeAxis.innerHTML = ''; cliaAxis.innerHTML = '';
             modal.classList.add('visible');
-            drawHeatmap('pae-canvas', [], 'pae');
-            drawHeatmap('clia-canvas', [], 'clia');
+            clearPlots();
             viewer3dEl.innerHTML = '';
             modalViewer = $3Dmol.createViewer(viewer3dEl, { backgroundColor: 'white' });
             if (node.pdb) {
@@ -415,6 +424,7 @@
             modal.classList.remove('visible');
             if (modalViewer) { try { modalViewer.clear(); } catch (e) {} modalViewer = null; }
             viewer3dEl.innerHTML = '';
+            clearPlots();
         }
         document.getElementById('modal-close').addEventListener('click', closeModal);
         modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
