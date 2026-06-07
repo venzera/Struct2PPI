@@ -1,0 +1,6 @@
+# Predicted-mode LIS scores | platform=alphafold3 | model=fold_ctcf_rad21_branchio rank=0
+# iLIS >= 0.223 suggests a likely interaction (Kim et al., 2026)
+chain_i	chain_j	iLIS	LIS	cLIS	LIA	cLIA	iLIA	ipTM	pLDDT_i	pLDDT_j	call
+A	B	0.766	0.667	0.879	18507	134	1574.8	0.940	95.7	93.7	POSITIVE
+B	C	0.651	0.572	0.740	539	10	73.4	0.420	93.7	79.1	POSITIVE
+A	C	0.630	0.538	0.736	5626	40	474.4	0.830	95.7	79.1	POSITIVE

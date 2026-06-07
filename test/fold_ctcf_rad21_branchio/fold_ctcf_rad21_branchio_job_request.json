@@ -1,0 +1,34 @@
+[{
+ "name": "CTCF_RAD21_Branchio",
+ "modelSeeds": [
+  "1337"
+ ],
+ "sequences": [
+  {
+   "proteinChain": {
+    "sequence": "ENMMLFEVVKMGKSAMQSVVDDWIESYKHDRDIALLDLINFFIQCSGCKGVVTAEMFRHMQNSEIIRKMTEEFDEDSGDYPLTMAGPQWKKFKSSFCEFIGVLVRQCQYSIIYDEYMMDTVISLLTGLSDSQVRAFRHTSTLAAMKLMTALVNVALNLSINMDNTQRQYEAERNKMIGKRANERLELLLQKRKELQENQDEIENMMNAIFKGVFVHRYRDAIAEIRAICIEEIGIWMKMYSDAFLNDSYLKYVGWTMHDKQGEVRLKCLTALQGLYYNKELNSKLELFTSRFKDRIVSMTLDKEYDVAVQAIKLLTLVLQSSEEVL",
+    "count": 1,
+    "useStructureTemplate": true,
+    "maxTemplateDate": "2025-02-02"
+   }
+  },
+  {
+   "proteinChain": {
+    "sequence": "KRKLIVDSVKELDSKTIRAQLSDYSDIVTTL",
+    "count": 1,
+    "useStructureTemplate": true,
+    "maxTemplateDate": "2025-02-02"
+   }
+  },
+  {
+   "proteinChain": {
+    "sequence": "DISVYDFDELDK",
+    "count": 1,
+    "useStructureTemplate": true
+   }
+  }
+ ],
+ "dialect": "alphafoldserver",
+ "version": 3
+}
+]

@@ -1,6 +1,6 @@
 # Struct2PPI - Protein-Protein Interaction Network Visualizer from protein complexes
 
-Generate interactive protein-protein interaction graphs from PDB/CIF files of Cryo-EM complexes (and not just Cryo-EM).
+Generate interactive protein-protein interaction graphs from PDB/CIF files of Cryo-EM complexes (and not just Cryo-EM), or from **structure predictions** (AlphaFold3 / Boltz / Chai-1) scored with the Local Interaction Score framework (LIS / cLIS / iLIS).
 
 ![PPI Graph Example - 8XKS](Scheme.jpg)
 
@@ -80,6 +80,62 @@ python ppi_graph_3d_dg.py structure.pdb --one_vs_all
 
 According to Kastritis & Bonvin (*J Mol Biol* 2014), PRODIGY's scoring function explicitly depends on the non-interacting surface (NIS) — polar and charged residues on the solvent-exposed surface outside the interface contribute to ΔG through hydration shell stability and long-range electrostatics. I assumed that in a multi-chain complex, the NIS composition changes when additional partners are bound (some surfaces get buried), so simply summing pairwise ΔG values would use wrong NIS contexts for each pair. The one-vs-all mode lets PRODIGY see the actual NIS of the full assembly, which should give a more realistic estimate.
 
+### `ppi_graph_predicted.py` - Predicted complexes (LIVIA / AFM-LIS integration)
+
+Build a PPI graph from a **predicted** complex (AlphaFold3, Boltz, Chai-1) and score every chain pair with the **Local Interaction Score** framework instead of PRODIGY/FoldX binding energy. This is the structure-prediction counterpart to `ppi_graph_3d_dg.py`, integrating the LIS / cLIS / iLIS metrics from [LIVIA / AFM-LIS](https://github.com/flyark/AFM-LIS) (Kim & Perrimon, 2026).
+
+The HTML is labelled **PREDICTED MODE** and shows the platform + model name. **Clicking an edge** opens a panel that, for that chain–chain interaction, shows:
+
+- the **3D pair complex** (two chains colored)
+- the inter-chain **PAE interaction plot**
+- the **contact-filtered LIA (cLIA) map** (PAE ≤ 12 Å **and** Cβ–Cβ ≤ 8 Å)
+- **LIS / cLIS / iLIS**, LIA / cLIA / iLIA, ipTM, and per-chain + interface **pLDDT** scores
+
+A pair is flagged a likely interaction when **iLIS ≥ 0.223** (Kim et al., 2026). **Double-click a node** for that single chain's 3D structure and average pLDDT. Edge thickness scales with iLIS; positive pairs are drawn solid, sub-threshold pairs dashed.
+
+```bash
+# Single prediction (folder of AF3 / Boltz / Chai output) → one graph
+python ppi_graph_predicted.py /path/to/af3_output_folder/
+python ppi_graph_predicted.py /path/to/boltz_folder/ --model 0
+python ppi_graph_predicted.py /path/to/predictions/ --output-dir ./results
+
+# Batch over many 2-chain predictions: pick the #1 model by iLIS per prediction,
+# emit a ranking + a graph for each dimer
+python ppi_graph_predicted.py /path/to/dimers_parent_folder/ --batch-dimer-predicted
+```
+
+> **Input must include the predictor's PAE / confidence file — not just the structure.**
+> LIS is computed from the Predicted Aligned Error, which is **not** stored in the `.cif`/`.pdb`. Point the tool at the *whole output folder*, which must contain:
+> - **AlphaFold3:** `*_model_N.cif` **+** `*_full_data_N.json` (PAE) **+** `*_summary_confidences_N.json`
+> - **Boltz:** `*_model_N.cif/.pdb` **+** `confidence_*.json` / `pae_*.npz`
+> - **Chai-1:** `pred.*.cif` **+** `scores.*.json` **+** `pae.*.npy/.npz`
+>
+> A structure file on its own (e.g. an AlphaFold Server `fold_*_model_N.cif` downloaded without its `full_data` JSON) cannot be scored and the tool exits with a message saying which companion file is missing.
+
+#### Flags
+
+| Flag | Description |
+|------|-------------|
+| `--predicted` | Predicted mode (default): one prediction → one graph; uses the best model by mean iLIS |
+| `--batch-dimer-predicted` | Scan a parent folder of 2-chain predictions; for each, select the #1 model by iLIS and write `batch_dimer_predicted_ranking.txt` plus a per-dimer graph |
+| `--model` | Model rank to visualize (default: best mean iLIS) |
+| `--edge-min-ilis` | Only draw edges with iLIS ≥ this value (default: 0, draw all) |
+| `--pae-cutoff` | PAE cutoff in Å for the confident interface (default: 12) |
+| `--cb-cutoff` | Cβ–Cβ contact cutoff in Å for cLIS/cLIA (default: 8) |
+
+#### The LIS metrics
+
+- **LIS** — average interface confidence over all residue pairs with PAE ≤ 12 Å.
+- **cLIS** — same, but restricted to pairs that are also in direct contact (Cβ–Cβ ≤ 8 Å).
+- **iLIS = √(LIS × cLIS)** — the recommended single metric; the geometric mean forces iLIS → 0 when no confident contacts exist, removing the "confident but physically distant" false positives.
+- **LIA / cLIA** — counts of confident / confident-and-contacting residue pairs (the *area* of the interface).
+
+LIS scoring is provided by the bundled `lis_lib.py`, a trimmed adaptation of AFM-LIS's `lis.py` for Struct2PPI: parallel processing, zip/tar/gz archive handling, and ChimeraX `.cxc` export are removed; the core scoring matches upstream exactly.
+
+```bash
+pip install biopython networkx scipy numpy gemmi   # predicted mode needs no extra deps
+```
+
 ## Output Files
 
 For input `structure.pdb` (or `.cif`, supported by all three scripts):
@@ -94,6 +150,11 @@ For input `structure.pdb` (or `.cif`, supported by all three scripts):
 - `structure_foldx_ddg.txt` - FoldX binding ΔΔG per chain pair (`--fx_mut`)
 - `structure_one_vs_all.txt` - One-vs-all PRODIGY ranking (`--one_vs_all`)
 - `structure_foldx/` - FoldX working directory with intermediate files (`--fx_score` or `--fx_mut`)
+
+For predicted mode (`ppi_graph_predicted.py`, input = prediction folder named `<name>`):
+- `<name>_predicted_ppi.html` - Interactive predicted PPI graph with PAE / cLIA maps + LIS scores
+- `<name>_lis_scores.txt` - Per-chain-pair LIS / cLIS / iLIS / LIA / cLIA / ipTM / pLDDT, sorted by iLIS, with a POSITIVE/negative call
+- `batch_dimer_predicted_ranking.txt` - Dimers ranked by best-model iLIS (`--batch-dimer-predicted`)
 
 ## Dependencies
 
@@ -149,6 +210,24 @@ python ppi_graph_3d_dg.py 8xks.pdb --one_vs_all --skip-prodigy
 
 The `test/` folder contains example outputs generated from PDB entry 8XKS (20 protein chains, 81 interactions).
 
+### Predicted mode — CTCF / RAD21 (AlphaFold3)
+
+`test/fold_ctcf_rad21_branchio/` is a complete AlphaFold3 server output (3 chains: CTCF + two RAD21 fragments) used to exercise predicted mode end-to-end:
+
+```bash
+python ppi_graph_predicted.py test/fold_ctcf_rad21_branchio --output-dir test/fold_ctcf_rad21_branchio
+```
+
+All three chain pairs score as positive interactions (iLIS ≥ 0.223):
+
+| Pair | iLIS | LIS | cLIS | LIA | cLIA | ipTM |
+|------|------|-----|------|-----|------|------|
+| A–B | 0.766 | 0.667 | 0.879 | 18507 | 134 | 0.940 |
+| B–C | 0.651 | 0.572 | 0.740 | 539 | 10 | 0.420 |
+| A–C | 0.630 | 0.538 | 0.736 | 5626 | 40 | 0.830 |
+
+`test/fold_p53_mdm2_model_2.cif` is included as the *counter-example*: a structure-only AlphaFold Server download with **no** `full_data` PAE JSON. Running predicted mode on it exits with a message stating which companion file is required — illustrating that the scores/PAE file (not just the model) is mandatory for LIS.
+
 ### 5L08 — Pairwise vs One-vs-All (Caspase-8 tDED filament)
 
 PDB ID [5L08](https://www.rcsb.org/structure/5L08) is a Caspase-8 complex with 9 identical chains (A–I, 19 interacting pairs).
@@ -193,6 +272,14 @@ If you use the binding energy prediction feature (`ppi_graph_3d_dg.py`), please 
 
 > Kastritis P.L., Rodrigues J.P.G.L.M., Folkers G.E., Boelens R., Bonvin A.M.J.J. "Proteins Feel More Than They See: Fine-Tuning of Binding Affinity by Properties of the Non-Interacting Surface." *Journal of Molecular Biology*, 14, 2632–2652 (2014). DOI: [10.1016/j.jmb.2014.04.017](https://doi.org/10.1016/j.jmb.2014.04.017)
 
-CIF → PDB conversion in `ppi_graph_3d_dg.py` uses GEMMI:
+If you use predicted mode (`ppi_graph_predicted.py`) and the LIS / cLIS / iLIS metrics, please cite LIVIA / AFM-LIS:
+
+> Kim, Ah-Ram, and Norbert Perrimon. "LIVIA: a browser-based tool for assessing and visualizing predicted protein interactions." *bioRxiv* (2026): 2026-05.
+
+> Kim A.-R., et al. "Enhanced Protein-Protein Interaction Discovery via AlphaFold-Multimer." *bioRxiv* (2024). DOI: [10.1101/2024.02.19.580970](https://www.biorxiv.org/content/10.1101/2024.02.19.580970v1)
+
+The LIS implementation in `lis_lib.py` is adapted from the AFM-LIS reference code: [github.com/flyark/AFM-LIS](https://github.com/flyark/AFM-LIS).
+
+CIF → PDB conversion in `ppi_graph_3d_dg.py` and `ppi_graph_predicted.py` uses GEMMI:
 
 > Wojdyr, Marcin. "GEMMI: A library for structural biology." *Journal of Open Source Software* 7.73 (2022): 4200. DOI: [10.21105/joss.04200](https://doi.org/10.21105/joss.04200)
