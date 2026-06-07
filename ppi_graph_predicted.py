@@ -130,10 +130,23 @@ def select_model(models, requested=None):
 # Graph + JSON payload
 # ============================================================================
 
+def get_chain_sequences(struct_path):
+    """One-letter sequence per chain (positions align with LIS residue indices)."""
+    st = gemmi.read_structure(struct_path)
+    st.setup_entities()
+    seqs = {}
+    for chain in st[0]:
+        poly = chain.get_polymer()
+        if poly:
+            seqs[chain.name] = gemmi.one_letter_code(poly.extract_sequence()).upper()
+    return seqs
+
+
 def build_payload(model, edge_min_ilis=0.0):
     """Build node/edge JSON for the HTML from a single analyzed model."""
     structure = load_biopython_structure(model['struct_path'], model['fmt'])
     bio_chains = {c.id for c in structure[0]}
+    seqs = get_chain_sequences(model['struct_path'])
 
     chains = model['chains']
     plddt = model['chain_plddt']
@@ -206,6 +219,12 @@ def build_payload(model, edge_min_ilis=0.0):
             'clia_map': p['clia_map'],
             'res_i': p['res_i'],
             'res_j': p['res_j'],
+            'seq_i': seqs.get(p['ci'], ''),
+            'seq_j': seqs.get(p['cj'], ''),
+            'lir_i': [int(x) for x in sorted(p['lirI'])],
+            'lir_j': [int(x) for x in sorted(p['lirJ'])],
+            'clir_i': [int(x) for x in sorted(p['clirI'])],
+            'clir_j': [int(x) for x in sorted(p['clirJ'])],
         })
 
     return nodes_js, edges_js, G
@@ -422,6 +441,13 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
         .plot { width: 100%; height: 300px; }
         .colorbar { font-size: 10px; color: #666; margin-top: 2px; }
         .swatch { display: inline-block; width: 12px; height: 12px; border-radius: 2px; margin-right: 4px; vertical-align: middle; }
+        .seqtrack { font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.6;
+            word-break: break-all; margin: 4px 0; padding: 4px; background: #fafafa; border-radius: 4px; }
+        .seqlabel { font-weight: bold; margin-right: 6px; }
+        .res { padding: 0 0.5px; border-radius: 2px; }
+        .res.lir { background: #fff3b0; }
+        .res.clir { background: #fb8c00; color: #fff; font-weight: bold; }
+        .seqlegend { font-size: 10px; color: #666; margin-bottom: 2px; }
     </style>
 </head>
 <body>
@@ -464,6 +490,15 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
                         <div class="plot" id="clia-plot"></div>
                         <div class="colorbar"><span class="swatch" style="background:#08306b"></span>confident contact (PAE&le;12 &amp; C&beta;&le;8&Aring;)
                             <span class="swatch" style="background:#f7fbff;border:1px solid #ccc"></span>none</div>
+                    </div>
+                    <div class="map-block" id="seq-block">
+                        <h4>Interface sequences</h4>
+                        <div class="seqlegend">
+                            <span class="swatch" style="background:#fb8c00"></span>cLIR (confident contact residue)
+                            <span class="swatch" style="background:#fff3b0;border:1px solid #ccc"></span>LIR (confident interface, PAE&le;12)
+                        </div>
+                        <div class="seqtrack" id="seq-i"></div>
+                        <div class="seqtrack" id="seq-j"></div>
                     </div>
                 </div>
             </div>
@@ -670,6 +705,21 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             Plotly.purge(document.getElementById('clia-plot'));
         }
 
+        function renderSequence(elId, chainId, seq, lir, clir, color) {
+            const el = document.getElementById(elId);
+            if (!seq) { el.innerHTML = ''; return; }
+            const L = new Set(lir), C = new Set(clir);
+            let html = '<span class="seqlabel" style="color:' + color + '">' + chainId + '</span>';
+            for (let i = 0; i < seq.length; i++) {
+                const pos = i + 1;
+                let cls = 'res';
+                if (C.has(pos)) cls += ' clir';
+                else if (L.has(pos)) cls += ' lir';
+                html += '<span class="' + cls + '" title="' + chainId + ' ' + pos + ' ' + seq[i] + '">' + seq[i] + '</span>';
+            }
+            el.innerHTML = html;
+        }
+
         // ===== Modal =====
         const modal = document.getElementById('modal');
         const modalTitle = document.getElementById('modal-title');
@@ -746,6 +796,8 @@ HTML_TEMPLATE = r"""<!DOCTYPE html>
             modal.classList.add('visible');
             plotPAE('pae-plot', edge);
             plotCLIA('clia-plot', edge);
+            renderSequence('seq-i', edge.chain1, edge.seq_i, edge.lir_i, edge.clir_i, '#4363d8');
+            renderSequence('seq-j', edge.chain2, edge.seq_j, edge.lir_j, edge.clir_j, '#e6194b');
 
             viewer3dEl.innerHTML = '';
             modalViewer = $3Dmol.createViewer(viewer3dEl, { backgroundColor: 'white' });

@@ -87,8 +87,9 @@ Build a PPI graph from a **predicted** complex (AlphaFold3, Boltz, Chai-1) and s
 The HTML is labelled **PREDICTED MODE** and shows the platform + model name. **Clicking an edge** opens a panel that, for that chain–chain interaction, shows:
 
 - the **3D pair complex** (two chains colored)
-- the inter-chain **PAE interaction plot**
+- the inter-chain **PAE interaction plot** (Plotly heatmap, ColabFold-style `bwr` colorscale)
 - the **contact-filtered LIA (cLIA) map** (PAE ≤ 12 Å **and** Cβ–Cβ ≤ 8 Å)
+- the **interface sequences** of both chains, with interacting residues colored — cLIR (confident contact residues) and LIR (confident interface, PAE ≤ 12)
 - **LIS / cLIS / iLIS**, LIA / cLIA / iLIA, ipTM, and per-chain + interface **pLDDT** scores
 
 A pair is flagged a likely interaction when **iLIS ≥ 0.223** (Kim et al., 2026). **Double-click a node** for that single chain's 3D structure and average pLDDT. Edge thickness scales with iLIS; positive pairs are drawn solid, sub-threshold pairs dashed.
@@ -209,6 +210,16 @@ python ppi_graph_3d_dg.py 8xks.pdb --one_vs_all --skip-prodigy
 ## Test Data
 
 The `test/` folder contains example outputs generated from PDB entry 8XKS (20 protein chains, 81 interactions).
+
+### Predicted mode — 9BK5 (AlphaFold3)
+
+`test/9BK5/fold_9bk5_baker/` is a complete AlphaFold3 output for the two-chain complex 9BK5 (chain A, 78 aa; chain B, 68 aa), alongside the experimental structure `test/9BK5/9BK5.cif`:
+
+```bash
+python ppi_graph_predicted.py test/9BK5/fold_9bk5_baker --output-dir test/9BK5/fold_9bk5_baker
+```
+
+The A–B pair is a confident predicted interaction (iLIS = 0.676, LIS = 0.594, cLIS = 0.769, ipTM = 0.800; 18 cLIR interface residues per chain). Click the edge in the HTML to see the PAE map, cLIA map, and the two interface sequences with their interacting residues highlighted.
 
 ### 5L08 — Pairwise vs One-vs-All (Caspase-8 tDED filament)
 

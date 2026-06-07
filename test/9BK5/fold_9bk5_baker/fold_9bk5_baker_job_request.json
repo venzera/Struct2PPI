@@ -1,0 +1,25 @@
+[{
+ "name": "9bk5_baker",
+ "modelSeeds": [
+  "1"
+ ],
+ "sequences": [
+  {
+   "proteinChain": {
+    "sequence": "GRIVVRGDVAIAEAVVRKVGEVAGKEVILLISYRKNGEWITYQRNLEATPEDVERTIAVIREIYEESGGDFILAIFSD",
+    "count": 1,
+    "useStructureTemplate": true
+   }
+  },
+  {
+   "proteinChain": {
+    "sequence": "IRCFITPDITSKDCPNGHVCYTKTWCDAFCSIRGKRVDLGCAATCPTVKTGVDIQCCSTDNCNPFPTR",
+    "count": 1,
+    "useStructureTemplate": true
+   }
+  }
+ ],
+ "dialect": "alphafoldserver",
+ "version": 3
+}
+]
