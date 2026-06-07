@@ -238,7 +238,7 @@ The one-vs-all ranking reveals which chains are most embedded in the complex: ch
 
 The relative ranking is preserved — chains B, H, E remain the most connected, D remains the most peripheral — but the absolute values diverge substantially. Summing pairwise ΔG overestimates binding by +8 to +22 kcal/mol per chain. The discrepancy scales with the number of interaction partners: chain B (6 pairs, Δ = +21.6) vs chain D (3 pairs, Δ = +8.1). This is consistent with pairwise scoring using incorrect NIS contexts — each isolated pair calculation assumes the remaining surface is fully solvent-exposed, when in reality other partners bury parts of it.
 
-## ΔG Evaluation
+## ΔG Evaluation (PRODIGY or FoldX)
 ### Binding Energy Prediction
 PRODIGY-based binding energy prediction enables rapid assessment of protein-protein interaction strengths directly from experimental structures. While PRODIGY excels at providing reliable relative rankings between complexes, users seeking accurate absolute binding free energy values should consider more rigorous methods such as FoldX, Rosetta, or MM/GBSA.
 ### Validation
