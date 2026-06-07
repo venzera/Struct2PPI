@@ -16,16 +16,9 @@ Clicking an edge opens a panel with, for that chain-chain interaction:
   * the contact-filtered LIA (cLIA) map
   * LIS / cLIS / iLIS, LIA / cLIA / iLIA, ipTM and pLDDT scores
 
-Modes
------
-  --predicted             (default) one prediction -> one graph. Uses the best
-                          model (highest mean iLIS) unless --model is given.
-  --batch-dimer-predicted scan a parent folder of 2-chain predictions, pick the
-                          best model per prediction by iLIS, and emit a ranking
-                          table + per-dimer graphs.
-
-LIS scoring is provided by the bundled ``lis_lib`` (a trimmed adaptation of
-AFM-LIS: no parallelism, no archive handling, no ChimeraX export).
+One prediction -> one graph. Uses the best model (highest mean iLIS) unless
+--model is given. LIS scoring is provided by the bundled ``lis_lib`` (a trimmed
+adaptation of AFM-LIS: no parallelism, no archive handling, no ChimeraX export).
 
 Reference:
     Kim, Ah-Ram, and Norbert Perrimon. "LIVIA: a browser-based tool for
@@ -35,7 +28,6 @@ Reference:
 Usage:
     python ppi_graph_predicted.py /path/to/af3_output_folder
     python ppi_graph_predicted.py /path/to/boltz_folder --model 0
-    python ppi_graph_predicted.py /path/to/dimers/ --batch-dimer-predicted
 """
 
 import argparse
@@ -1001,55 +993,6 @@ def run_predicted(path, output_dir, model_req, edge_min_ilis, pae_cutoff, cb_cut
     return model
 
 
-def run_batch_dimer(parent, output_dir, pae_cutoff, cb_cutoff):
-    """Scan subfolders of `parent`, each a 2-chain prediction; pick best model by iLIS."""
-    subdirs = [os.path.join(parent, d) for d in sorted(os.listdir(parent))
-               if os.path.isdir(os.path.join(parent, d))]
-    if not subdirs:
-        subdirs = [parent]  # parent itself is a single prediction
-
-    os.makedirs(output_dir, exist_ok=True)
-    rows = []
-    for sub in subdirs:
-        try:
-            models = lis_lib.analyze_prediction(sub, pae_cutoff=pae_cutoff, cb_cutoff=cb_cutoff)
-        except ValueError as e:
-            print(f"  skip {os.path.basename(sub)}: {e.args[0].splitlines()[0]}")
-            continue
-        # Only consider the top inter-chain pair of each model; pick best model by that iLIS
-        best_model, best_pair = None, None
-        for m in models:
-            if not m['pairs']:
-                continue
-            top = max(m['pairs'], key=lambda p: p['iLIS'])
-            if best_pair is None or top['iLIS'] > best_pair['iLIS']:
-                best_model, best_pair = m, top
-        if best_model is None:
-            print(f"  skip {os.path.basename(sub)}: no chain pairs")
-            continue
-
-        nodes_js, edges_js, _G = build_payload(best_model)
-        base = best_model['name'] or os.path.basename(sub)
-        html_out = os.path.join(output_dir, f"{base}_predicted_ppi.html")
-        render_scored(best_model, nodes_js, edges_js, html_out, base)
-        rows.append((base, best_model['platform'], best_model['rank'], best_pair))
-        print(f"  {base}: best iLIS {best_pair['iLIS']:.3f} "
-              f"({best_pair['ci']}-{best_pair['cj']}, rank {best_model['rank']})")
-
-    rows.sort(key=lambda r: -r[3]['iLIS'])
-    rank_out = os.path.join(output_dir, "batch_dimer_predicted_ranking.txt")
-    with open(rank_out, 'w') as f:
-        f.write("# Batch dimer predicted ranking -- best model (by iLIS) per prediction\n")
-        f.write(f"# iLIS >= {lis_lib.ILIS_THRESHOLD} suggests a likely interaction (Kim et al., 2026)\n")
-        f.write("rank\tprediction\tplatform\tmodel_rank\tpair\tiLIS\tLIS\tcLIS\tLIA\tcLIA\tipTM\tcall\n")
-        for i, (base, platform, mrank, p) in enumerate(rows, 1):
-            call = 'POSITIVE' if p['iLIS'] >= lis_lib.ILIS_THRESHOLD else 'negative'
-            iptm = f"{p['ipTM']:.3f}" if p['ipTM'] is not None else 'NA'
-            f.write(f"{i}\t{base}\t{platform}\t{mrank}\t{p['ci']}-{p['cj']}\t{p['iLIS']:.3f}\t"
-                    f"{p['LIS']:.3f}\t{p['cLIS']:.3f}\t{int(p['LIA'])}\t{int(p['cLIA'])}\t{iptm}\t{call}\n")
-    print(f"\nSaved batch ranking ({len(rows)} dimers): {rank_out}")
-
-
 # ============================================================================
 # CLI
 # ============================================================================
@@ -1063,9 +1006,6 @@ def main():
     parser.add_argument('input', help='Prediction folder (or single structure file with sibling PAE)')
     parser.add_argument('--predicted', action='store_true',
                         help='Predicted mode (default). One prediction -> one graph.')
-    parser.add_argument('--batch-dimer-predicted', action='store_true',
-                        help='Scan a parent folder of 2-chain predictions; pick best model per '
-                             'prediction by iLIS and emit a ranking.')
     parser.add_argument('--model', default=None,
                         help='Model rank to use (default: best mean iLIS).')
     parser.add_argument('--edge-min-ilis', type=float, default=0.0,
@@ -1079,11 +1019,8 @@ def main():
     args = parser.parse_args()
 
     try:
-        if args.batch_dimer_predicted:
-            run_batch_dimer(args.input, args.output_dir, args.pae_cutoff, args.cb_cutoff)
-        else:
-            run_predicted(args.input, args.output_dir, args.model, args.edge_min_ilis,
-                          args.pae_cutoff, args.cb_cutoff, args.contact_cutoff)
+        run_predicted(args.input, args.output_dir, args.model, args.edge_min_ilis,
+                      args.pae_cutoff, args.cb_cutoff, args.contact_cutoff)
     except ValueError as e:
         raise SystemExit(f"Error: {e}")
 

@@ -84,7 +84,7 @@ According to Kastritis & Bonvin (*J Mol Biol* 2014), PRODIGY's scoring function 
 
 Build a PPI graph from a **predicted** complex (AlphaFold3, Boltz, Chai-1) and score every chain pair with the **Local Interaction Score** framework instead of PRODIGY/FoldX binding energy. This is the structure-prediction counterpart to `ppi_graph_3d_dg.py`, integrating the LIS / cLIS / iLIS metrics from [LIVIA / AFM-LIS](https://github.com/flyark/AFM-LIS) (Kim & Perrimon, 2026).
 
-The HTML is labelled **PREDICTED MODE** and shows the platform + model name. **Clicking an edge** opens a panel that, for that chain–chain interaction, shows:
+Click an edge for a panel showing, for that chain pair:
 
 - the **3D pair complex** (two chains colored)
 - the inter-chain **PAE interaction plot** (Plotly heatmap, ColabFold-style `bwr` colorscale)
@@ -92,17 +92,12 @@ The HTML is labelled **PREDICTED MODE** and shows the platform + model name. **C
 - the **interface sequences** of both chains, with interacting residues colored — cLIR (confident contact residues) and LIR (confident interface, PAE ≤ 12)
 - **LIS / cLIS / iLIS**, LIA / cLIA / iLIA, ipTM, and per-chain + interface **pLDDT** scores
 
-A pair is flagged a likely interaction when **iLIS ≥ 0.223** (Kim et al., 2026). **Double-click a node** for that single chain's 3D structure and average pLDDT. Edge thickness scales with iLIS; positive pairs are drawn solid, sub-threshold pairs dashed.
+A pair is flagged a likely interaction when **iLIS ≥ 0.223** (Kim et al., 2026). Double-click a node for its chain's 3D structure and average pLDDT. Edge thickness scales with iLIS; positive pairs are drawn solid, sub-threshold pairs dashed.
 
 ```bash
-# Single prediction (folder of AF3 / Boltz / Chai output) → one graph
 python ppi_graph_predicted.py /path/to/af3_output_folder/
 python ppi_graph_predicted.py /path/to/boltz_folder/ --model 0
 python ppi_graph_predicted.py /path/to/predictions/ --output-dir ./results
-
-# Batch over many 2-chain predictions: pick the #1 model by iLIS per prediction,
-# emit a ranking + a graph for each dimer
-python ppi_graph_predicted.py /path/to/dimers_parent_folder/ --batch-dimer-predicted
 ```
 
 > **For LIS scoring, the input must include the predictor's PAE / confidence file — not just the structure.**
@@ -117,8 +112,6 @@ python ppi_graph_predicted.py /path/to/dimers_parent_folder/ --batch-dimer-predi
 
 | Flag | Description |
 |------|-------------|
-| `--predicted` | Predicted mode (default): one prediction → one graph; uses the best model by mean iLIS |
-| `--batch-dimer-predicted` | Scan a parent folder of 2-chain predictions; for each, select the #1 model by iLIS and write `batch_dimer_predicted_ranking.txt` plus a per-dimer graph |
 | `--model` | Model rank to visualize (default: best mean iLIS) |
 | `--edge-min-ilis` | Only draw edges with iLIS ≥ this value (default: 0, draw all) |
 | `--pae-cutoff` | PAE cutoff in Å for the confident interface (default: 12) |
@@ -155,7 +148,6 @@ For input `structure.pdb` (or `.cif`, supported by all three scripts):
 For predicted mode (`ppi_graph_predicted.py`, input = prediction folder named `<name>`):
 - `<name>_predicted_ppi.html` - Interactive predicted PPI graph with PAE / cLIA maps + LIS scores
 - `<name>_lis_scores.txt` - Per-chain-pair LIS / cLIS / iLIS / LIA / cLIA / ipTM / pLDDT, sorted by iLIS, with a POSITIVE/negative call
-- `batch_dimer_predicted_ranking.txt` - Dimers ranked by best-model iLIS (`--batch-dimer-predicted`)
 
 ## Dependencies
 
