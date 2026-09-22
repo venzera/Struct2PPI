@@ -24,7 +24,28 @@ Interactive Plotly-based visualization with draggable nodes and colored edges.
 ```bash
 python ppi_graph.py structure.cif
 python ppi_graph.py structure.pdb --cutoff 5.0
+python ppi_graph.py structure.pdb --topology
 ```
+
+#### SMOC filament call (`--topology`)
+
+`--topology` writes `<basename>_topology.txt` from the same chain-contact graph (default 5 Å). No coordinates are used. The report lists connected components, a spectral (Fiedler) order of each component, the contact-offset banding, the cut-crossing profile, and one call:
+
+- **continuous filament** — one component whose interior crossing profile is flat
+- **interrupted filament** — a sharp localized dip in that profile
+- **multiple filaments** — more than one component of at least three chains
+- **non-filamentous** — the interior crossing profile is uneven (a ramp or scatter, not a single dip)
+- **borderline** — too short for a real interior, or sitting next to a threshold
+
+The primary gate is the coefficient of variation of the interior cut-crossing weights, plus a separate dip-ratio check for a break at one position. Banding (`frac_outside_modal`) is still computed and written in the report, but it does not decide the call: that fraction depends on helical start number and rise, so a cutoff fit on one family (ASC-PYD, 3-start) does not transfer to DED, DD, or RHIM assemblies.
+
+Only chain pairs sharing at least 5 residue contacts define the band. Weaker pairs stay in the graph and in the crossing profile, but a grazing contact should not widen the band: in the RIPK1 fibril 9HR6 each chain meets its stacking neighbour across 72 residue pairs at 2.7 Å, while three second-neighbour pairs share 3 residue pairs at 3.9 Å and disappear below a 3.5 Å cutoff.
+
+This call is a graph-topology label. It is not an amyloid classifier. A cross-β fibril and an α-helical death-fold filament can both be continuous filaments; a short amyloid or a closed platform can fail the call.
+
+![SMOC examples: amyloid vs filament](smoc_examples.png)
+
+Left to right: PurE tetramer, a globular oligomer (3RGG); ASC-PYD continuous filament, not amyloid (3J63); RIPK1 homo-amyloid fibril (9HR6). All three are single-protein assemblies, so no chain belongs to a partner protein. Contact graphs are Struct2PPI’s own layout.
 
 ### `ppi_graph_3d.py` - STRING DB Style with 3D Structures
 Network graph with 3D protein structures rendered inside nodes using 3Dmol.js.
@@ -134,6 +155,7 @@ pip install biopython networkx scipy numpy gemmi   # predicted mode needs no ext
 
 For input `structure.pdb` (or `.cif`, supported by all three scripts):
 - `structure_ppi_graph.html` - Interactive 2D network (ppi_graph.py)
+- `structure_topology.txt` - SMOC filament call, spectral order, banding, and cut-crossing profile (`ppi_graph.py --topology`)
 - `structure_ppi_3d.html` - Network with 3D structure nodes (ppi_graph_3d.py)
 - `structure_ppi_3d_dg.html` - Network with 3D nodes + binding energy (ppi_graph_3d_dg.py)
 - `structure_chain_info.txt` - Chain ID to protein name mapping

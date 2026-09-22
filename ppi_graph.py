@@ -579,6 +579,50 @@ def save_residue_contacts(residue_contacts, chain_labels, output_file):
     print(f"Saved residue contacts: {output_file}")
 
 
+def save_topology_report(interactions, protein_chain_ids, output_file):
+    """Optional SMOC-style topology report: connected components, spectral
+    ordering, banding, cut-crossing profile, and the continuous/interrupted/
+    multiple/non-filamentous/borderline call. Graph-only (no coordinates) --
+    see smoc_topology.py for the method definition.
+
+    Validated against 3J63/2N1F (called "continuous filament"), a known
+    multi-filament case (human ASC-PYD N=42, called "non-filamentous"), and
+    two synthetic controls (interior-cut deletion -> "multiple filaments";
+    two disjoint filaments -> "multiple filaments").
+    """
+    import smoc_topology as st
+
+    edges = [(c1, c2, w) for (c1, c2), w in interactions.items()]
+    chain_index_map = {c: i for i, c in enumerate(sorted(protein_chain_ids))}
+    report = st.full_topology_report(edges, chain_index_map=chain_index_map)
+
+    with open(output_file, 'w') as f:
+        f.write(f"SMOC topology report\n{'=' * 60}\n\n")
+        f.write(f"n_chains: {report['n_total_chains']}\n")
+        f.write(f"n_components: {report['n_components']}\n")
+        f.write(f"component_sizes: {report['component_sizes']}\n\n")
+        f.write(f"CALL: {report['call']['call']}\n")
+        f.write(f"reason: {report['call']['reason']}\n\n")
+
+        for i, comp in enumerate(report['components']):
+            f.write(f"--- component {i} ---\n")
+            f.write(f"n_nodes: {comp['n_nodes']}  n_edges: {comp['n_edges']}\n")
+            f.write(f"spectral_order: {comp['spectral_order']}\n")
+            f.write(f"spearman(spectral, chain_index): {comp['spearman_vs_chain_index']}\n")
+            band = comp['banding']
+            f.write(f"modal_offsets: {sorted(band['modal_offsets'])}  "
+                    f"frac_outside_modal: {band['frac_outside_modal']:.3f}  "
+                    f"bandwidth: {band['bandwidth']}\n")
+            istats = comp['interior_stats']
+            f.write(f"interior plateau: {istats['plateau_weight']}  CV: {istats['cv_weight']}  "
+                    f"min_interior: {istats['min_interior_weight']} at cut {istats['min_interior_pos']}\n")
+            f.write(f"crossing_weights (by cut position): {comp['crossing_weights']}\n")
+            f.write(f"diameter: {comp['diameter']}  mean_shortest_path: {comp['mean_shortest_path']}\n\n")
+
+    print(f"Saved topology report: {output_file}")
+    return report
+
+
 def main():
     parser = argparse.ArgumentParser(
         description='Generate protein-protein interaction graph from PDB/CIF files',
@@ -596,6 +640,11 @@ Examples:
                         help='Distance cutoff for interactions in Angstroms (default: 5.0)')
     parser.add_argument('--output-dir', type=str, default='.',
                         help='Output directory (default: current directory)')
+    parser.add_argument('--topology', action='store_true',
+                        help='Also write a SMOC-style topology report: connected components, '
+                             'spectral ordering, banding, cut-crossing profile, and a '
+                             'continuous/interrupted/multiple/non-filamentous/borderline call. '
+                             'Graph-only (no coordinates); see smoc_topology.py.')
 
     args = parser.parse_args()
 
@@ -649,11 +698,19 @@ Examples:
     save_chain_info(chain_labels, protein_chain_ids, chain_info_file)
     save_residue_contacts(residue_contacts, chain_labels, contacts_file)
 
+    topology_call = None
+    if args.topology:
+        topology_file = os.path.join(args.output_dir, f"{basename}_topology.txt")
+        topology_report = save_topology_report(interactions, protein_chain_ids, topology_file)
+        topology_call = topology_report['call']['call']
+
     print("\nDone!")
     print(f"\nSummary:")
     print(f"  Protein chains: {len(protein_chain_ids)}")
     print(f"  Interacting pairs: {len(interactions)}")
     print(f"  Total contacts: {sum(interactions.values())}")
+    if topology_call:
+        print(f"  Topology call: {topology_call}")
 
     return 0
 
