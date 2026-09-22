@@ -110,14 +110,20 @@ def interior_stats(counts, weights, end_window):
     n_cuts = len(counts)
     lo = end_window
     hi = n_cuts - end_window
-    if hi <= lo:
-        # too short to have an interior distinct from the ends
+    # degenerate: structure too short for its own bandwidth to leave an
+    # interior distinct from the end taper. Falling back to the full range
+    # here would mix in the legitimately-lower end-taper cuts and inflate
+    # CV for a reason that has nothing to do with interruption -- flag this
+    # explicitly rather than silently computing a misleading CV over it.
+    degenerate = hi <= lo
+    if degenerate:
         lo, hi = 0, n_cuts
     interior_counts = counts[lo:hi]
     interior_weights = weights[lo:hi]
     if len(interior_weights) == 0:
         return {'plateau_weight': None, 'cv_weight': None, 'min_interior_weight': None,
-                'min_interior_pos': None, 'end_window_used': end_window, 'interior_range': (lo, hi)}
+                'min_interior_pos': None, 'end_window_used': end_window, 'interior_range': (lo, hi),
+                'degenerate_interior': True}
     plateau = float(np.mean(interior_weights))
     cv = float(np.std(interior_weights) / plateau) if plateau > 0 else float('inf')
     min_idx_local = int(np.argmin(interior_weights))
@@ -125,7 +131,8 @@ def interior_stats(counts, weights, end_window):
     return {'plateau_weight': plateau, 'cv_weight': cv,
             'min_interior_weight': float(interior_weights[min_idx_local]),
             'min_interior_count': int(interior_counts[min_idx_local]),
-            'min_interior_pos': min_pos, 'end_window_used': end_window, 'interior_range': (lo, hi)}
+            'min_interior_pos': min_pos, 'end_window_used': end_window, 'interior_range': (lo, hi),
+            'degenerate_interior': degenerate}
 
 
 def degree_distribution(G_component, spectral_order, end_window):
@@ -181,12 +188,32 @@ def analyze_component(G_component, chain_index_map=None, pca_rank_map=None):
 
 def classify_topology(components_analysis, n_total_chains,
                        banding_frac_outside_thresh=0.3,
-                       dip_ratio_thresh=0.5):
+                       dip_ratio_thresh=0.5,
+                       cv_thresh=0.15):
     """Category from a list of per-component analyze_component() outputs.
-    Thresholds are provisional defaults for the validation phase; the full
-    27-folder run recalibrates them from the observed CV/min-crossing
-    distributions (see smoc_full_run.py) and this function accepts override
-    thresholds.
+
+    REVISED (after validating on a 64-structure death-fold PDB survey
+    spanning DED/PYD/DD/RHIM families): banding (frac_outside_modal) is
+    reported but no longer a hard gate on the call. Evidence: comparing two
+    same-family, same-size structures (9U6E vs 9U7A, both N=24, 60 edges)
+    showed near-identical, cleanly FLAT crossing profiles (CV 0.082 vs
+    0.004) but opposite banding fractions (0.567 vs 0.233) -- banding is
+    sensitive to a filament's specific helical parameters (start-number,
+    rise/rotation) and a threshold fit to the ASC-PYD 3-start system does
+    not transfer to other families. The crossing-profile SHAPE is the more
+    architecture-agnostic signal and still discriminates correctly (e.g.
+    correctly flat for the genuine MyD88 DD filament 6I3N, correctly
+    non-flat/ramping for the known false case, human ASC-PYD N=42).
+
+    Primary gate is now the interior crossing-weight coefficient of
+    variation (CV): cv_thresh=0.15 sits between the highest CV among cases
+    that should read as continuous (6I3N=0.119, a real filament) and the
+    lowest CV among cases that should not (human N=42=0.227, two filaments
+    lying alongside each other -- its dip_ratio alone does NOT catch this,
+    since the failure mode is a broad asymmetric ramp, not a sharp
+    localized dip, which is why CV rather than dip_ratio is now primary).
+    dip_ratio remains a SEPARATE check for a sharp localized dip (a genuine
+    interruption at one position) even within an otherwise low-CV profile.
 
     Categories: continuous filament / interrupted filament /
     multiple filaments / non-filamentous / borderline (with reason).
@@ -201,34 +228,60 @@ def classify_topology(components_analysis, n_total_chains,
 
     comp = large_components[0]
     frac_outside = comp['banding']['frac_outside_modal']
-    if frac_outside > banding_frac_outside_thresh:
-        return {'call': 'non-filamentous',
-                'reason': f'no clear band structure (frac_outside_modal={frac_outside:.2f} > {banding_frac_outside_thresh})',
-                'n_components': 1}
 
     istats = comp['interior_stats']
     plateau = istats['plateau_weight']
     min_w = istats['min_interior_weight']
+    cv = istats['cv_weight']
     if plateau is None or plateau == 0:
         return {'call': 'borderline', 'reason': 'no defined interior (too short / bandwidth too large)',
                 'n_components': 1}
 
     dip_ratio = min_w / plateau
+
+    # too short for its own bandwidth to have a true interior distinct from
+    # the end taper -- CV over the full (taper-included) profile isn't a
+    # meaningful flatness measure here. Report borderline rather than guess.
+    if istats.get('degenerate_interior'):
+        return {'call': 'borderline',
+                'reason': f'no true interior distinct from end-taper (structure too short for its own '
+                          f'bandwidth={comp["banding"]["bandwidth"]}); CV={cv:.3f} not reliable here '
+                          f'(banding frac_outside_modal={frac_outside:.2f}, reported not gating)',
+                'n_components': 1}
+
+    # sharp localized dip -> interrupted, regardless of overall CV
     if dip_ratio < dip_ratio_thresh:
         return {'call': 'interrupted filament',
-                'reason': f'interior crossing dip: min/plateau = {dip_ratio:.2f} < {dip_ratio_thresh}',
+                'reason': f'interior crossing dip: min/plateau = {dip_ratio:.2f} < {dip_ratio_thresh} '
+                          f'(banding frac_outside_modal={frac_outside:.2f}, reported not gating)',
                 'dip_position': istats['min_interior_pos'],
                 'flanking_chains': (comp['spectral_order'][istats['min_interior_pos']],
                                      comp['spectral_order'][istats['min_interior_pos'] + 1])
                                     if istats['min_interior_pos'] is not None else None,
                 'n_components': 1}
 
-    # borderline zone just above threshold
+    # broad non-flatness (ramp/scatter rather than a sharp dip) -> non-filamentous,
+    # with a borderline band just above the threshold checked FIRST so a value
+    # like 0.158 against a 0.15 threshold reads as borderline, not a hard fail.
+    if cv > cv_thresh * 1.2:
+        return {'call': 'non-filamentous',
+                'reason': f'interior crossing profile not flat (CV={cv:.3f} > {cv_thresh*1.2:.3f}; '
+                          f'banding frac_outside_modal={frac_outside:.2f}, reported not gating)',
+                'n_components': 1}
+
+    if cv > cv_thresh:
+        return {'call': 'borderline',
+                'reason': f'CV={cv:.3f} in the borderline band above threshold {cv_thresh} '
+                          f'(banding frac_outside_modal={frac_outside:.2f}, reported not gating)',
+                'n_components': 1}
+
+    # borderline zone just above dip_ratio threshold
     if dip_ratio < dip_ratio_thresh * 1.3:
         return {'call': 'borderline', 'reason': f'dip_ratio={dip_ratio:.2f} close to threshold {dip_ratio_thresh}',
                 'n_components': 1}
 
-    return {'call': 'continuous filament', 'reason': f'dip_ratio={dip_ratio:.2f}, frac_outside_modal={frac_outside:.2f}',
+    return {'call': 'continuous filament',
+            'reason': f'dip_ratio={dip_ratio:.2f}, CV={cv:.3f}, frac_outside_modal={frac_outside:.2f} (not gating)',
             'n_components': 1}
 
 
