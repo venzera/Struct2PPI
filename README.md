@@ -45,7 +45,7 @@ This call is a graph-topology label. It is not an amyloid classifier. A cross-β
 
 ![SMOC examples: amyloid vs filament](smoc_examples.png)
 
-Left to right: PurE tetramer, a globular oligomer (3RGG); FADD/caspase-8/cFLIP DED assembly, not a filament (8YNI); ASC-PYD continuous filament, not amyloid (3J63); RIPK1 amyloid as a single protofilament (9HR6); RIPK1–RIPK3 amyloid as two interleaved protofilaments (5V7Z). Contact graphs are Struct2PPI’s own layout.
+Left to right: PurE tetramer, a globular oligomer (3RGG); ASC-PYD continuous filament, not amyloid (3J63); RIPK1 homo-amyloid fibril (9HR6). All three are single-protein assemblies, so no chain belongs to a partner protein. Contact graphs are Struct2PPI’s own layout.
 
 ### `ppi_graph_3d.py` - STRING DB Style with 3D Structures
 Network graph with 3D protein structures rendered inside nodes using 3Dmol.js.
