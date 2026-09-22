@@ -39,11 +39,13 @@ python ppi_graph.py structure.pdb --topology
 
 The primary gate is the coefficient of variation of the interior cut-crossing weights, plus a separate dip-ratio check for a break at one position. Banding (`frac_outside_modal`) is still computed and written in the report, but it does not decide the call: that fraction depends on helical start number and rise, so a cutoff fit on one family (ASC-PYD, 3-start) does not transfer to DED, DD, or RHIM assemblies.
 
+Only chain pairs sharing at least 5 residue contacts define the band. Weaker pairs stay in the graph and in the crossing profile, but a grazing contact should not widen the band: in the RIPK1 fibril 9HR6 each chain meets its stacking neighbour across 72 residue pairs at 2.7 Å, while three second-neighbour pairs share 3 residue pairs at 3.9 Å and disappear below a 3.5 Å cutoff.
+
 This call is a graph-topology label. It is not an amyloid classifier. A cross-β fibril and an α-helical death-fold filament can both be continuous filaments; a short amyloid or a closed platform can fail the call.
 
 ![SMOC examples: amyloid vs filament](smoc_examples.png)
 
-Left to right: RIPK1 amyloid that is too short for a continuous-filament call (9HR6); ASC-PYD continuous filament, not amyloid (3J63); RIPK1–RIPK3 amyloid that is a continuous filament (5V7Z); FADD/caspase-8/cFLIP DED assembly, not a filament (8YNI); PurE tetramer, a globular oligomer (3RGG). Contact graphs are Struct2PPI’s own layout.
+Left to right: PurE tetramer, a globular oligomer (3RGG); FADD/caspase-8/cFLIP DED assembly, not a filament (8YNI); ASC-PYD continuous filament, not amyloid (3J63); RIPK1 amyloid as a single protofilament (9HR6); RIPK1–RIPK3 amyloid as two interleaved protofilaments (5V7Z). Contact graphs are Struct2PPI’s own layout.
 
 ### `ppi_graph_3d.py` - STRING DB Style with 3D Structures
 Network graph with 3D protein structures rendered inside nodes using 3Dmol.js.

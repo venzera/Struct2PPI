@@ -23,8 +23,10 @@ Method notes:
   - Banding: for the spectral-ordered adjacency matrix, "modal offset set" =
     offsets |pos_i - pos_j| whose edge count is >= 50% of the single most
     frequent offset's count (a half-max band definition, stated explicitly
-    since it is a judgement call). "Fraction of edges outside the modal
-    offset set" is reported as the primary banding-failure diagnostic.
+    since it is a judgement call). Only edges of >= 5 residue pairs enter
+    this histogram, so a grazing chain-pair contact cannot widen the band
+    (see banding_analysis). "Fraction of edges outside the modal offset set"
+    is reported as the primary banding-failure diagnostic.
   - Cut-crossing profile: for each cut position k (between spectral ranks k
     and k+1, k=0..n-2), the number and summed contact-weight of edges with
     one endpoint at rank <=k and the other at rank >k. The end taper window
@@ -68,20 +70,41 @@ def fiedler_order(G_component):
     return ordered_nodes, fiedler_values
 
 
-def banding_analysis(G_component, spectral_order):
+def banding_analysis(G_component, spectral_order, min_interface_weight=5):
     """Offset histogram under spectral order; modal offset set (half-max
-    rule); fraction of edges outside it."""
+    rule); fraction of edges outside it.
+
+    Only edges representing a real interface (weight >= min_interface_weight
+    residue pairs) contribute to the offset histogram. Edges below that stay
+    in the graph -- they still carry connectivity and still appear in the
+    crossing profile -- but they do not define the band. The half-max rule
+    counts edges rather than contact mass, so without this floor a few
+    grazing contacts weigh as much as a full interface: in the RIPK1 fibril
+    9HR6 each chain touches its stacking neighbour across 72 residue pairs
+    at 2.7 Å, while the three second-neighbour pairs share 3 residue pairs
+    at 3.9 Å and vanish entirely below a 3.5 Å cutoff. Those three edges
+    were enough to put offset 2 in the modal set, which set bandwidth=2,
+    left a 5-chain stack with no interior, and reported borderline for what
+    is plainly a continuous stack.
+    """
     pos = {n: i for i, n in enumerate(spectral_order)}
     offset_counts = defaultdict(int)
     offset_weight = defaultdict(float)
     total_edges = 0
+    n_below_floor = 0
     for u, v, data in G_component.edges(data=True):
         off = abs(pos[u] - pos[v])
+        w = data.get('weight', 1)
+        if w < min_interface_weight:
+            n_below_floor += 1
+            continue
         offset_counts[off] += 1
-        offset_weight[off] += data.get('weight', 1)
+        offset_weight[off] += w
         total_edges += 1
     if not offset_counts:
-        return {'offset_counts': {}, 'modal_offsets': set(), 'frac_outside_modal': 1.0, 'bandwidth': 0}
+        return {'offset_counts': {}, 'modal_offsets': set(), 'frac_outside_modal': 1.0,
+                'bandwidth': 0, 'n_edges_below_interface_floor': n_below_floor,
+                'min_interface_weight': min_interface_weight}
     max_count = max(offset_counts.values())
     modal_offsets = {off for off, c in offset_counts.items() if c >= 0.5 * max_count}
     n_outside = sum(c for off, c in offset_counts.items() if off not in modal_offsets)
@@ -89,7 +112,9 @@ def banding_analysis(G_component, spectral_order):
     bandwidth = max(modal_offsets) if modal_offsets else 0
     return {'offset_counts': dict(offset_counts), 'offset_weight': dict(offset_weight),
             'modal_offsets': modal_offsets, 'frac_outside_modal': frac_outside,
-            'bandwidth': bandwidth, 'total_edges': total_edges}
+            'bandwidth': bandwidth, 'total_edges': total_edges,
+            'n_edges_below_interface_floor': n_below_floor,
+            'min_interface_weight': min_interface_weight}
 
 
 def crossing_profile(G_component, spectral_order):
@@ -115,7 +140,14 @@ def interior_stats(counts, weights, end_window):
     # here would mix in the legitimately-lower end-taper cuts and inflate
     # CV for a reason that has nothing to do with interruption -- flag this
     # explicitly rather than silently computing a misleading CV over it.
-    degenerate = hi <= lo
+    #
+    # A single interior cut counts as degenerate too: the CV of one value is
+    # zero by construction and its min equals its plateau, so both gates in
+    # classify_topology pass without testing anything. That is how the PurE
+    # tetramer 3RGG, a closed 4-chain clique, read as a continuous filament.
+    # The reference filaments 3J63 and 2N1F have two interior cuts, so two
+    # is the smallest width that can carry evidence here.
+    degenerate = (hi - lo) < 2
     if degenerate:
         lo, hi = 0, n_cuts
     interior_counts = counts[lo:hi]
@@ -244,9 +276,9 @@ def classify_topology(components_analysis, n_total_chains,
     # meaningful flatness measure here. Report borderline rather than guess.
     if istats.get('degenerate_interior'):
         return {'call': 'borderline',
-                'reason': f'no true interior distinct from end-taper (structure too short for its own '
-                          f'bandwidth={comp["banding"]["bandwidth"]}); CV={cv:.3f} not reliable here '
-                          f'(banding frac_outside_modal={frac_outside:.2f}, reported not gating)',
+                'reason': f'fewer than 2 interior cuts distinct from end-taper (structure too short for '
+                          f'its own bandwidth={comp["banding"]["bandwidth"]}); CV={cv:.3f} not reliable '
+                          f'here (banding frac_outside_modal={frac_outside:.2f}, reported not gating)',
                 'n_components': 1}
 
     # sharp localized dip -> interrupted, regardless of overall CV
