@@ -43,7 +43,7 @@ This call is a graph-topology label. It is not an amyloid classifier. A cross-β
 
 ![SMOC examples: amyloid vs filament](smoc_examples.png)
 
-Left to right: RIPK1 amyloid that is too short for a continuous-filament call (9HR6); ASC-PYD continuous filament, not amyloid (3J63); RIPK1–RIPK3 amyloid that is a continuous filament (5V7Z); FADD/caspase-8/cFLIP DED assembly, not amyloid and not a filament (8YNI). Blue arcs are contacts at the modal spectral offset; red arcs fall outside it.
+Left to right: RIPK1 amyloid that is too short for a continuous-filament call (9HR6); ASC-PYD continuous filament, not amyloid (3J63); RIPK1–RIPK3 amyloid that is a continuous filament (5V7Z); FADD/caspase-8/cFLIP DED assembly, not a filament (8YNI); PurE tetramer, a globular oligomer (3RGG). Contact graphs are Struct2PPI’s own layout.
 
 ### `ppi_graph_3d.py` - STRING DB Style with 3D Structures
 Network graph with 3D protein structures rendered inside nodes using 3Dmol.js.
